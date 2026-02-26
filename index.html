@@ -2207,8 +2207,14 @@ function openModal(){
   ['f-carmodel','f-partno','f-item','f-owner','f-desc','f-qty'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   uploadedPhotos=[]; renderPhotoGrid();
   document.getElementById('modal-reg').classList.add('open');
+  const fab = document.querySelector('.fab-btn');
+  if (fab) fab.style.display = 'none';
 }
-function closeModal(){ document.getElementById('modal-reg').classList.remove('open'); }
+function closeModal(){
+  document.getElementById('modal-reg').classList.remove('open');
+  const fab = document.querySelector('.fab-btn');
+  if (fab) fab.style.display = '';
+}
 
 async function submitDefect(){
   const item=document.getElementById('f-item').value.trim();
@@ -2249,12 +2255,18 @@ function openEditModal(id){
   setSelectVal('e-type',d.type); setSelectVal('e-sev',d.occurrence);
   setSelectVal('e-status',d.status);
   document.getElementById('modal-edit').classList.add('open');
+  const fab = document.querySelector('.fab-btn');
+  if (fab) fab.style.display = 'none';
 }
 function setSelectVal(id,val){
   const sel=document.getElementById(id);
   for(let opt of sel.options){ if(opt.value===val||opt.text===val){sel.value=opt.value;break;} }
 }
-function closeEditModal(){ document.getElementById('modal-edit').classList.remove('open'); }
+function closeEditModal(){
+  document.getElementById('modal-edit').classList.remove('open');
+  const fab = document.querySelector('.fab-btn');
+  if (fab) fab.style.display = '';
+}
 
 async function saveEdit(){
   const item=document.getElementById('e-item').value.trim();

@@ -940,31 +940,34 @@ tbody tr:hover td { background: #f8faff; }
     <!-- ════ 대시보드 ════ -->
     <div id="page-home" class="page active">
 
+      <!-- 생산수량 입력 -->
+      <div id="prod-qty-wrap" style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:12px 18px;margin-bottom:14px;box-shadow:var(--shadow-sm);"></div>
+
       <!-- KPI 카드 -->
       <div class="kpi-grid">
         <div class="kpi-card blue">
           <div class="kpi-icon">🔬</div>
-          <div class="kpi-label">전체 불량 건수</div>
+          <div class="kpi-label">당월 불량 건수</div>
           <div class="kpi-value" id="kpi-total">-</div>
-          <div class="kpi-sub" id="kpi-total-sub">불량 관리 데이터 기준</div>
+          <div class="kpi-sub" id="kpi-total-sub">당월 등록 기준</div>
         </div>
         <div class="kpi-card green">
-          <div class="kpi-icon">✅</div>
-          <div class="kpi-label">완료 처리율</div>
+          <div class="kpi-icon">🏭</div>
+          <div class="kpi-label">고객사 불량 건수</div>
           <div class="kpi-value" id="kpi-closed-rate">-</div>
-          <div class="kpi-sub" id="kpi-closed-sub">완료 / 전체</div>
+          <div class="kpi-sub" id="kpi-closed-sub">HMI 1 + HMI 2</div>
         </div>
         <div class="kpi-card orange">
-          <div class="kpi-icon">⚠️</div>
-          <div class="kpi-label">이번 달 불량</div>
+          <div class="kpi-icon">📊</div>
+          <div class="kpi-label">고객사 불량 PPM</div>
           <div class="kpi-value" id="kpi-thismonth">-</div>
-          <div class="kpi-sub" id="kpi-thismonth-sub">이번 달 등록 건수</div>
+          <div class="kpi-sub" id="kpi-thismonth-sub">생산수량 기준</div>
         </div>
         <div class="kpi-card red">
-          <div class="kpi-icon">🚨</div>
-          <div class="kpi-label">미처리 건수</div>
+          <div class="kpi-icon">⚙️</div>
+          <div class="kpi-label">사내 불량 PPM</div>
           <div class="kpi-value" id="kpi-open">-</div>
-          <div class="kpi-sub" id="kpi-open-sub">즉시 조치 필요</div>
+          <div class="kpi-sub" id="kpi-open-sub">수입검사~PDI 기준</div>
         </div>
       </div>
 
@@ -1083,8 +1086,10 @@ tbody tr:hover td { background: #f8faff; }
             </thead>
             <tbody id="defect-tbody"></tbody>
           </table>
-    </div>
-    </div>
+        </div>
+      </div>
+    </div><!-- /page-defects -->
+
     <!-- ════ 월간 보고서 ════ -->
     <div id="page-report" class="page">
 
@@ -1123,49 +1128,62 @@ tbody tr:hover td { background: #f8faff; }
         </div>
       </div>
 
+      <!-- 차트 그리드 -->
       <div class="grid-2">
-        <!-- 불량 유형별 -->
         <div class="card">
           <div class="card-header"><div>
-            <div class="card-title">불량 유형별</div>
+            <div class="card-title">불량 유형별 현황</div>
             <div class="card-sub" id="r-type-sub"></div>
           </div></div>
-          <div class="bar-list" id="r-chart-type"></div>
+          <div id="r-chart-type"></div>
         </div>
-        <!-- 발생처별 -->
         <div class="card">
           <div class="card-header"><div>
-            <div class="card-title">발생처별</div>
+            <div class="card-title">발생처별 현황</div>
             <div class="card-sub" id="r-occ-sub"></div>
           </div></div>
           <div class="bar-list" id="r-chart-occ"></div>
         </div>
-        <!-- 모델별 -->
         <div class="card">
           <div class="card-header"><div>
-            <div class="card-title">모델별</div>
+            <div class="card-title">모델별 현황</div>
             <div class="card-sub" id="r-model-sub"></div>
           </div></div>
           <div class="bar-list" id="r-chart-model"></div>
         </div>
-        <!-- 귀책처별 -->
         <div class="card">
           <div class="card-header"><div>
-            <div class="card-title">귀책처별</div>
+            <div class="card-title">귀책처별 현황</div>
             <div class="card-sub" id="r-owner-sub"></div>
           </div></div>
           <div class="bar-list" id="r-chart-owner"></div>
         </div>
       </div>
 
+      <!-- 월별 추이 (해당 연도 12개월) -->
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-header"><div>
+          <div class="card-title">월별 불량 추이</div>
+          <div class="card-sub" id="r-trend-sub"></div>
+        </div></div>
+        <svg id="r-trend-svg" width="100%" height="130" viewBox="-15 0 950 130" preserveAspectRatio="none"></svg>
+      </div>
+
+      <!-- 발생처별 개별 추이 -->
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-header"><div>
+          <div class="card-title">발생처별 월별 추이</div>
+          <div class="card-sub" id="r-occ-trend-sub"></div>
+        </div></div>
+        <div id="r-occ-charts-wrap" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"></div>
+      </div>
+
       <!-- 당월 불량 목록 -->
       <div class="card" style="margin-top:4px;">
-        <div class="card-header">
-          <div>
-            <div class="card-title">당월 불량 목록</div>
-            <div class="card-sub" id="r-list-sub"></div>
-          </div>
-        </div>
+        <div class="card-header"><div>
+          <div class="card-title">당월 불량 목록</div>
+          <div class="card-sub" id="r-list-sub"></div>
+        </div></div>
         <div class="table-wrap">
           <table class="report-table">
             <thead>
@@ -1179,7 +1197,8 @@ tbody tr:hover td { background: #f8faff; }
       <!-- 종합 의견 -->
       <div class="card" style="margin-top:4px;">
         <div class="summary-box" id="r-summary"></div>
-    </div>
+      </div>
+
     </div><!-- /page-report -->
 
   </div><!-- /content -->
@@ -1414,19 +1433,38 @@ async function sheetLoad() {
   if (!GAS_URL) return;
   setLoadingBar(true);
   try {
-    const res  = await fetch(GAS_URL + '?t=' + Date.now());
-    const json = await res.json();
+    // 불량 데이터 + 생산수량 병렬 로딩
+    const [res, prodRes] = await Promise.all([
+      fetch(GAS_URL + '?t=' + Date.now()),
+      fetch(GAS_URL + '?action=production&t=' + Date.now())
+    ]);
+    const json     = await res.json();
+    const prodJson = await prodRes.json();
+
     if (!json.ok) throw new Error(json.error);
     if (json.data.length > 0) {
       defects = json.data.map(d => ({ ...d, photos:[] }));
-      renderHomeDefects(); renderTable(); updateBadge(); renderDashboard();
-      showToast('success','Google Sheets 연동 완료', `${defects.length}건을 불러왔습니다.`);
-    } else {
-      showToast('info','Sheets 연결 성공','시트에 데이터가 없습니다. 불량을 등록하면 자동 저장됩니다.');
     }
+    if (prodJson.ok && prodJson.data) {
+      productionData = {};
+      prodJson.data.forEach(r => { if(r.ym) productionData[r.ym] = Number(r.qty)||0; });
+    }
+    renderHomeDefects(); renderTable(); updateBadge(); renderDashboard();
+    showToast('success','Google Sheets 연동 완료', `불량 ${defects.length}건 불러왔습니다.`);
   } catch(e) {
     showToast('error','Sheets 연결 실패', e.message + '<br>URL을 다시 확인해 주세요.');
   } finally { setLoadingBar(false); }
+}
+
+// 생산수량 저장
+async function saveProdQty(ym, qty) {
+  if (!GAS_URL) return;
+  try {
+    await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ action:'production_update', ym, qty: Number(qty) }) });
+    productionData[ym] = Number(qty);
+    renderDashboard();
+    showToast('success', '생산수량 저장', `${ym} → ${Number(qty).toLocaleString()}개`);
+  } catch(e) { showToast('error','저장 실패', e.message); }
 }
 
 async function sheetSync(showMsg=true) {
@@ -1498,6 +1536,9 @@ function updateSheetBtn() {
 
 // ══ STATE ══
 let searchQ='', filterSev='', filterStatus='';
+
+// 생산수량 데이터 { 'YYYY-MM': qty }
+let productionData = {};
 let uploadedPhotos=[];
 
 // ══ NAVIGATION ══
@@ -1526,139 +1567,141 @@ function goPage(name, el) {
 function renderDashboard() {
   const now    = new Date();
   const thisYM = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  const total  = defects.length;
-  const openList   = defects.filter(d => d.status === 'open');
-  const closedCnt  = defects.filter(d => d.status === 'closed').length;
-  const thisMonth  = defects.filter(d => (d.date||'').startsWith(thisYM));
-  const closedRate = total ? Math.round(closedCnt / total * 100) : 0;
+  const label  = `${now.getFullYear()}년 ${now.getMonth()+1}월`;
 
-  // KPI 카드
-  document.getElementById('kpi-total').textContent       = total.toLocaleString() + '건';
-  document.getElementById('kpi-total-sub').textContent   = `완료 ${closedCnt}건 · 미처리 ${openList.length}건`;
-  document.getElementById('kpi-closed-rate').textContent = closedRate + '%';
-  document.getElementById('kpi-closed-sub').textContent  = `${closedCnt}건 / 전체 ${total}건 완료`;
-  document.getElementById('kpi-thismonth').textContent   = thisMonth.length + '건';
-  document.getElementById('kpi-thismonth-sub').textContent = `${now.getMonth()+1}월 등록 기준`;
-  document.getElementById('kpi-open').textContent        = openList.length + '건';
-  document.getElementById('kpi-open-sub').textContent    = openList.length > 0 ? '즉시 조치 필요' : '✅ 모두 처리 완료';
+  // 당월 데이터
+  const monthData = defects.filter(d => (d.date||'').startsWith(thisYM));
 
-  // 불량 유형별 현황 — 원형(도넛) 차트
-  const typeColors = ['#e02424','#d97706','#7c3aed','#1a56db','#057a55','#0891b2','#9aa5b4'];
-  const typeMap = {};
-  defects.forEach(d => { typeMap[d.type] = (typeMap[d.type]||0) + 1; });
-  const typeArr = Object.entries(typeMap).sort((a,b) => b[1]-a[1]);
-  const typeTotal = typeArr.reduce((s,[,v])=>s+v,0);
+  // 전월 비교
+  const prevD  = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const prevYM = `${prevD.getFullYear()}-${String(prevD.getMonth()+1).padStart(2,'0')}`;
+  const prevMonth = defects.filter(d => (d.date||'').startsWith(prevYM));
+  const diff   = monthData.length - prevMonth.length;
 
-  if (typeArr.length === 0) {
-    document.getElementById('chart-type').innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:40px 0;text-align:center;">데이터 없음</div>';
-  } else {
-    // SVG 도넛 차트 생성
-    const cx=100, cy=100, R=80, r=50;
-    let startAngle = -Math.PI/2;
-    let slices = '';
-    typeArr.forEach(([type,cnt],i) => {
-      const angle = (cnt/typeTotal)*2*Math.PI;
+  // 고객사 불량 (HMI 1 + HMI 2)
+  const customerDefects = monthData.filter(d => d.occurrence === 'HMI 1' || d.occurrence === 'HMI 2');
+  // 사내 불량 (수입검사+프레스라인+조립라인+PDI)
+  const internalOcc = ['수입검사','프레스라인','조립라인','PDI'];
+  const internalDefects = monthData.filter(d => internalOcc.includes(d.occurrence));
+
+  // 생산수량
+  const prodQty = productionData[thisYM] || 0;
+
+  // PPM 계산 (불량수량 합계 기준)
+  const customerQty  = customerDefects.reduce((s,d)=>s+Number(d.qty||0),0);
+  const internalQty  = internalDefects.reduce((s,d)=>s+Number(d.qty||0),0);
+  const customerPPM  = prodQty > 0 ? Math.round(customerQty / prodQty * 1000000) : null;
+  const internalPPM  = prodQty > 0 ? Math.round(internalQty / prodQty * 1000000) : null;
+
+  const ppmStr  = (val) => val === null ? '생산수량 미입력' : val.toLocaleString();
+
+  // KPI 렌더링
+  document.getElementById('kpi-total').textContent        = monthData.length + '건';
+  document.getElementById('kpi-total-sub').textContent    = `${label} · 전월 대비 ${diff>0?'▲+'+diff:diff<0?'▼'+diff:'─'} 건`;
+  document.getElementById('kpi-closed-rate').textContent  = customerDefects.length + '건';
+  document.getElementById('kpi-closed-sub').textContent   = `HMI 1: ${monthData.filter(d=>d.occurrence==='HMI 1').length}건 · HMI 2: ${monthData.filter(d=>d.occurrence==='HMI 2').length}건`;
+  document.getElementById('kpi-thismonth').textContent    = customerPPM === null ? '-' : customerPPM.toLocaleString();
+  document.getElementById('kpi-thismonth-sub').textContent = prodQty > 0 ? `생산 ${prodQty.toLocaleString()}개 기준` : '생산수량 미입력';
+  document.getElementById('kpi-open').textContent         = internalPPM === null ? '-' : internalPPM.toLocaleString();
+  document.getElementById('kpi-open-sub').textContent     = prodQty > 0 ? `사내 불량 ${internalQty}개 기준` : '생산수량 미입력';
+
+  // 생산수량 입력 UI (대시보드 상단)
+  const prodWrap = document.getElementById('prod-qty-wrap');
+  if (prodWrap) {
+    prodWrap.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:13px;color:var(--text-muted);font-weight:600;">📦 ${label} 생산수량</span>
+        <input type="number" id="prod-qty-input" value="${prodQty||''}" placeholder="생산수량 입력"
+          style="width:140px;padding:6px 10px;border:1px solid var(--border-dark);border-radius:8px;font-size:13px;font-family:'DM Mono',monospace;">
+        <button class="btn btn-primary btn-sm" onclick="saveProdQtyFromInput()">저장</button>
+        ${prodQty > 0 ? `<span style="font-size:12px;color:var(--success);font-weight:600;">✅ ${prodQty.toLocaleString()}개 등록됨</span>` : `<span style="font-size:12px;color:var(--danger);">⚠️ 미입력 시 PPM 계산 불가</span>`}
+      </div>`;
+  }
+
+  // 공통 색상
+  const typeColors  = ['#e02424','#d97706','#7c3aed','#1a56db','#057a55','#0891b2','#9aa5b4'];
+  const occColorMap = {'수입검사':'#1a56db','프레스라인':'#d97706','조립라인':'#7c3aed','PDI':'#057a55','HMI 1':'#e02424','HMI 2':'#0891b2','기타':'#9aa5b4'};
+  const ownerColors = ['#057a55','#e02424','#d97706','#1a56db','#7c3aed','#0891b2','#9aa5b4'];
+  const modelColors = ['#1a56db','#7c3aed','#0891b2','#d97706','#057a55','#e02424','#9aa5b4'];
+  const itemColors  = ['#0891b2','#7c3aed','#d97706','#057a55','#e02424','#1a56db','#9aa5b4'];
+
+  function groupBy(arr, key) {
+    const map = {};
+    arr.forEach(d => { const k = d[key]||'-'; map[k] = (map[k]||0)+1; });
+    return Object.entries(map).sort((a,b) => b[1]-a[1]);
+  }
+
+  function renderBar(elId, arr, colorFn) {
+    const max = arr[0]?.[1] || 1;
+    document.getElementById(elId).innerHTML = arr.length
+      ? arr.map(([k,cnt],i) => `
+        <div class="bar-row">
+          <div class="bar-lbl">${k}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/max*100)}%;background:${colorFn(k,i)};transition:width 0.6s ease;"></div></div>
+          <div class="bar-num">${cnt}건</div>
+        </div>`).join('')
+      : '<div style="color:var(--text-muted);font-size:13px;padding:24px 0;text-align:center;">당월 데이터 없음</div>';
+  }
+
+  function renderDonut(elId, arr, colors) {
+    const tot = arr.reduce((s,[,v])=>s+v,0);
+    if (!arr.length) { document.getElementById(elId).innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:40px 0;text-align:center;">당월 데이터 없음</div>'; return; }
+    const cx=100,cy=100,R=80,r=50;
+    let startAngle = -Math.PI/2, slices = '';
+    arr.forEach(([type,cnt],i) => {
+      const angle = (cnt/tot)*2*Math.PI;
       const x1=cx+R*Math.cos(startAngle), y1=cy+R*Math.sin(startAngle);
       const x2=cx+R*Math.cos(startAngle+angle), y2=cy+R*Math.sin(startAngle+angle);
       const ix1=cx+r*Math.cos(startAngle), iy1=cy+r*Math.sin(startAngle);
       const ix2=cx+r*Math.cos(startAngle+angle), iy2=cy+r*Math.sin(startAngle+angle);
       const large = angle > Math.PI ? 1 : 0;
-      const color = typeColors[i%typeColors.length];
-      // 중간 각도에 라벨
-      const midA = startAngle + angle/2;
-      const lx = cx+(R+14)*Math.cos(midA), ly = cy+(R+14)*Math.sin(midA);
-      const pct = Math.round(cnt/typeTotal*100);
+      const color = colors[i%colors.length];
+      const midA  = startAngle + angle/2;
+      const lx=cx+(R+14)*Math.cos(midA), ly=cy+(R+14)*Math.sin(midA);
+      const pct = Math.round(cnt/tot*100);
       slices += `<path d="M${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} L${ix2},${iy2} A${r},${r} 0 ${large},0 ${ix1},${iy1} Z" fill="${color}" opacity="0.9"/>`;
       if (pct >= 5) slices += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" fill="${color}" font-size="10" font-weight="700" font-family="DM Mono">${pct}%</text>`;
       startAngle += angle;
     });
-    // 중앙 합계
-    slices += `<text x="${cx}" y="${cy-7}" text-anchor="middle" fill="var(--text)" font-size="11" font-family="Noto Sans KR">전체</text>`;
-    slices += `<text x="${cx}" y="${cy+10}" text-anchor="middle" fill="var(--text)" font-size="18" font-weight="700" font-family="DM Mono">${typeTotal}</text>`;
+    slices += `<text x="${cx}" y="${cy-7}" text-anchor="middle" fill="var(--text)" font-size="11" font-family="Noto Sans KR">당월</text>`;
+    slices += `<text x="${cx}" y="${cy+10}" text-anchor="middle" fill="var(--text)" font-size="18" font-weight="700" font-family="DM Mono">${tot}</text>`;
     slices += `<text x="${cx}" y="${cy+26}" text-anchor="middle" fill="var(--text-muted)" font-size="10" font-family="Noto Sans KR">건</text>`;
-
-    // 범례
-    const legend = typeArr.map(([type,cnt],i)=>`
+    const legend = arr.map(([type,cnt],i)=>`
       <div style="display:flex;align-items:center;gap:6px;font-size:12px;margin-bottom:6px;">
-        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${typeColors[i%typeColors.length]};flex-shrink:0;"></span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${colors[i%colors.length]};flex-shrink:0;"></span>
         <span style="flex:1;color:var(--text);">${type}</span>
         <span style="font-family:'DM Mono',monospace;color:var(--text-muted);">${cnt}건</span>
       </div>`).join('');
-
-    document.getElementById('chart-type').innerHTML = `
+    document.getElementById(elId).innerHTML = `
       <div style="display:flex;align-items:center;gap:16px;">
         <svg viewBox="0 0 200 200" width="160" height="160" style="flex-shrink:0;">${slices}</svg>
         <div style="flex:1;">${legend}</div>
       </div>`;
   }
 
-  // 모델별 현황
-  const modelColors = ['#1a56db','#7c3aed','#0891b2','#d97706','#057a55','#e02424','#9aa5b4'];
-  const modelMap = {};
-  defects.forEach(d => { const k = d.carModel||'-'; modelMap[k] = (modelMap[k]||0) + 1; });
-  const modelArr = Object.entries(modelMap).sort((a,b) => b[1]-a[1]);
-  const modelMax = modelArr[0]?.[1] || 1;
-  document.getElementById('chart-model').innerHTML = modelArr.length ? modelArr.map(([model,cnt],i) => `
-    <div class="bar-row">
-      <div class="bar-lbl">${model}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/modelMax*100)}%;background:${modelColors[i%modelColors.length]};transition:width 0.6s ease;"></div></div>
-      <div class="bar-num">${cnt}건</div>
-    </div>`).join('')
-  : '<div style="color:var(--text-muted);font-size:13px;padding:16px 0;text-align:center;">데이터 없음</div>';
+  // 차트 렌더링 (모두 당월 기준)
+  renderDonut('chart-type', groupBy(monthData,'type'), typeColors);
+  renderBar('chart-model',      groupBy(monthData,'carModel'),   (k,i)=>modelColors[i%modelColors.length]);
+  renderBar('chart-occurrence', groupBy(monthData,'occurrence'), (k)=>occColorMap[k]||'#9aa5b4');
+  renderBar('chart-owner',      groupBy(monthData,'owner'),      (k,i)=>ownerColors[i%ownerColors.length]);
+  renderBar('chart-item',       groupBy(monthData,'item'),       (k,i)=>itemColors[i%itemColors.length]);
 
-  // 발생처별 현황
-  const occColors = { '자사':'#1a56db', '협력사':'#d97706', '시장':'#7c3aed', '기타':'#9aa5b4' };
-  const occMap = {};
-  defects.forEach(d => { const k = d.occurrence||'-'; occMap[k] = (occMap[k]||0) + 1; });
-  const occArr = Object.entries(occMap).sort((a,b) => b[1]-a[1]);
-  const occMax = occArr[0]?.[1] || 1;
-  document.getElementById('chart-occurrence').innerHTML = occArr.length ? occArr.map(([occ,cnt]) => `
-    <div class="bar-row">
-      <div class="bar-lbl">${occ}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/occMax*100)}%;background:${occColors[occ]||'#9aa5b4'};transition:width 0.6s ease;"></div></div>
-      <div class="bar-num">${cnt}건</div>
-    </div>`).join('')
-  : '<div style="color:var(--text-muted);font-size:13px;padding:16px 0;text-align:center;">데이터 없음</div>';
+  // card-sub 월 표시 업데이트
+  ['chart-model','chart-occurrence','chart-owner','chart-item'].forEach(id => {
+    const card = document.getElementById(id).closest('.card');
+    if (card) { const sub = card.querySelector('.card-sub'); if(sub) sub.textContent = label + ' 기준'; }
+  });
 
-  // 귀책처별 현황
-  const ownerColors = ['#057a55','#e02424','#d97706','#1a56db','#7c3aed','#0891b2','#9aa5b4'];
-  const ownerMap = {};
-  defects.forEach(d => { const k = d.owner||'-'; ownerMap[k] = (ownerMap[k]||0) + 1; });
-  const ownerArr = Object.entries(ownerMap).sort((a,b) => b[1]-a[1]);
-  const ownerMax = ownerArr[0]?.[1] || 1;
-  document.getElementById('chart-owner').innerHTML = ownerArr.length ? ownerArr.map(([owner,cnt],i) => `
-    <div class="bar-row">
-      <div class="bar-lbl">${owner}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/ownerMax*100)}%;background:${ownerColors[i%ownerColors.length]};transition:width 0.6s ease;"></div></div>
-      <div class="bar-num">${cnt}건</div>
-    </div>`).join('')
-  : '<div style="color:var(--text-muted);font-size:13px;padding:16px 0;text-align:center;">데이터 없음</div>';
-
-  // 품목명별 현황
-  const itemColors = ['#0891b2','#7c3aed','#d97706','#057a55','#e02424','#1a56db','#9aa5b4'];
-  const itemMap = {};
-  defects.forEach(d => { const k = d.item||'-'; itemMap[k] = (itemMap[k]||0) + 1; });
-  const itemArr = Object.entries(itemMap).sort((a,b) => b[1]-a[1]);
-  const itemMax = itemArr[0]?.[1] || 1;
-  document.getElementById('chart-item').innerHTML = itemArr.length ? itemArr.map(([item,cnt],i) => `
-    <div class="bar-row">
-      <div class="bar-lbl">${item}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/itemMax*100)}%;background:${itemColors[i%itemColors.length]};transition:width 0.6s ease;"></div></div>
-      <div class="bar-num">${cnt}건</div>
-    </div>`).join('')
-  : '<div style="color:var(--text-muted);font-size:13px;padding:16px 0;text-align:center;">데이터 없음</div>';
-
-  // 월별 불량 추이 (최근 6개월)
-  const months = [];
-  for (let i = 5; i >= 0; i--) {
-    const d   = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const ym  = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    const cnt = defects.filter(x => (x.date||'').startsWith(ym)).length;
-    months.push({ label: `${d.getMonth()+1}월`, cnt });
-  }
-  renderTrendSVG(months);
-
-  // 발생처별 월별 추이
+  // 월별 추이 (6개월)
+  renderTrendSVG((() => {
+    const months = [];
+    for (let i=5;i>=0;i--) {
+      const d  = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      const ym = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      months.push({ label:`${d.getMonth()+1}월`, ym, cnt: defects.filter(x=>(x.date||'').startsWith(ym)).length });
+    }
+    return months;
+  })());
   renderOccurrenceTrend(now);
 }
 
@@ -1772,67 +1815,185 @@ function changeReportMonth(dir) {
 }
 
 function renderReport() {
-  const ym      = `${reportYear}-${String(reportMonth).padStart(2,'0')}`;
-  const prevD   = new Date(reportYear, reportMonth - 2, 1);
-  const prevYM  = `${prevD.getFullYear()}-${String(prevD.getMonth()+1).padStart(2,'0')}`;
+  const ym     = `${reportYear}-${String(reportMonth).padStart(2,'0')}`;
+  const prevD  = new Date(reportYear, reportMonth - 2, 1);
+  const prevYM = `${prevD.getFullYear()}-${String(prevD.getMonth()+1).padStart(2,'0')}`;
+  const label  = `${reportYear}년 ${reportMonth}월`;
 
-  const curr    = defects.filter(d => (d.date||'').startsWith(ym));
-  const prev    = defects.filter(d => (d.date||'').startsWith(prevYM));
-  const closed  = curr.filter(d => d.status === 'closed');
-  const open    = curr.filter(d => d.status === 'open');
-  const rate    = curr.length ? Math.round(closed.length / curr.length * 100) : 0;
-  const diff    = curr.length - prev.length;
+  const curr   = defects.filter(d => (d.date||'').startsWith(ym));
+  const prev   = defects.filter(d => (d.date||'').startsWith(prevYM));
+  const closed = curr.filter(d => d.status === 'closed');
+  const open   = curr.filter(d => d.status === 'open');
+  const rate   = curr.length ? Math.round(closed.length / curr.length * 100) : 0;
+  const diff   = curr.length - prev.length;
 
-  // 헤더
-  document.getElementById('report-month-label').textContent = `${reportYear}년 ${reportMonth}월`;
+  document.getElementById('report-month-label').textContent = label;
 
   // KPI
-  document.getElementById('r-total').textContent     = curr.length + '건';
-  document.getElementById('r-total-sub').textContent = `전체 누계 ${defects.length}건 중`;
+  document.getElementById('r-total').textContent      = curr.length + '건';
+  document.getElementById('r-total-sub').textContent  = `전체 누계 ${defects.length}건 중`;
   document.getElementById('r-closed-rate').textContent = rate + '%';
   document.getElementById('r-closed-sub').textContent  = `완료 ${closed.length}건 / 당월 ${curr.length}건`;
-  document.getElementById('r-open').textContent      = open.length + '건';
-  document.getElementById('r-open-sub').textContent  = open.length > 0 ? '즉시 조치 필요' : '✅ 모두 처리 완료';
+  document.getElementById('r-open').textContent       = open.length + '건';
+  document.getElementById('r-open-sub').textContent   = open.length > 0 ? '즉시 조치 필요' : '✅ 모두 처리 완료';
+  const diffEl = document.getElementById('r-diff');
+  diffEl.textContent = (diff > 0 ? '▲ +' : diff < 0 ? '▼ ' : '─ ') + diff + '건';
+  diffEl.style.color = diff > 0 ? 'var(--danger)' : diff < 0 ? 'var(--success)' : 'var(--text-muted)';
+  document.getElementById('r-diff-sub').textContent = `전월(${prevD.getMonth()+1}월) ${prev.length}건 대비`;
 
-  const diffEl  = document.getElementById('r-diff');
-  const diffSub = document.getElementById('r-diff-sub');
-  diffEl.textContent  = (diff > 0 ? '▲ +' : diff < 0 ? '▼ ' : '─ ') + diff + '건';
-  diffEl.style.color  = diff > 0 ? 'var(--danger)' : diff < 0 ? 'var(--success)' : 'var(--text-muted)';
-  diffSub.textContent = `전월(${prevD.getMonth()+1}월) ${prev.length}건 대비`;
+  // 색상
+  const typeColors  = ['#e02424','#d97706','#7c3aed','#1a56db','#057a55','#0891b2','#9aa5b4'];
+  const occColorMap = {'수입검사':'#1a56db','프레스라인':'#d97706','조립라인':'#7c3aed','PDI':'#057a55','HMI 1':'#e02424','HMI 2':'#0891b2','기타':'#9aa5b4'};
+  const ownerColors = ['#057a55','#e02424','#d97706','#1a56db','#7c3aed','#0891b2','#9aa5b4'];
+  const modelColors = ['#1a56db','#7c3aed','#0891b2','#d97706','#057a55','#e02424','#9aa5b4'];
 
-  // 공통 바차트 렌더러
-  const barColors = ['#e02424','#d97706','#7c3aed','#1a56db','#057a55','#0891b2','#9aa5b4'];
-  const occColors = { '자사':'#1a56db', '협력사':'#d97706', '시장':'#7c3aed', '기타':'#9aa5b4' };
-
-  function renderBarChart(elId, subId, data, colorFn) {
-    const max = data[0]?.[1] || 1;
-    document.getElementById(subId).textContent = `${ym} 기준 · ${curr.length}건`;
-    document.getElementById(elId).innerHTML = data.length
-      ? data.map(([k, cnt], i) => `
-          <div class="bar-row">
-            <div class="bar-lbl">${k}</div>
-            <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/max*100)}%;background:${colorFn(k,i)};transition:width 0.6s;"></div></div>
-            <div class="bar-num">${cnt}건</div>
-          </div>`).join('')
-      : '<div style="color:var(--text-muted);font-size:13px;padding:16px 0;text-align:center;">당월 데이터 없음</div>';
+  function groupBy(arr, key) {
+    const map = {};
+    arr.forEach(d => { const k = d[key]||'-'; map[k]=(map[k]||0)+1; });
+    return Object.entries(map).sort((a,b) => b[1]-a[1]);
   }
 
-  const group = (key) => {
-    const map = {};
-    curr.forEach(d => { const k = d[key]||'-'; map[k] = (map[k]||0) + 1; });
-    return Object.entries(map).sort((a,b) => b[1]-a[1]);
-  };
+  function renderBar(elId, subId, arr, colorFn, subText) {
+    if(subId) document.getElementById(subId).textContent = subText || label + ' 기준';
+    const max = arr[0]?.[1] || 1;
+    document.getElementById(elId).innerHTML = arr.length
+      ? arr.map(([k,cnt],i) => `
+        <div class="bar-row">
+          <div class="bar-lbl">${k}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/max*100)}%;background:${colorFn(k,i)};transition:width 0.6s ease;"></div></div>
+          <div class="bar-num">${cnt}건</div>
+        </div>`).join('')
+      : '<div style="color:var(--text-muted);font-size:13px;padding:24px 0;text-align:center;">당월 데이터 없음</div>';
+  }
 
-  renderBarChart('r-chart-type',  'r-type-sub',  group('type'),       (k,i) => barColors[i % barColors.length]);
-  renderBarChart('r-chart-occ',   'r-occ-sub',   group('occurrence'), (k)   => occColors[k] || '#9aa5b4');
-  renderBarChart('r-chart-model', 'r-model-sub', group('carModel'),   (k,i) => barColors[(i+1) % barColors.length]);
-  renderBarChart('r-chart-owner', 'r-owner-sub', group('owner'),      (k,i) => barColors[(i+2) % barColors.length]);
+  // 불량 유형 도넛 차트
+  const typeArr = groupBy(curr, 'type');
+  const typeTot = typeArr.reduce((s,[,v])=>s+v, 0);
+  document.getElementById('r-type-sub').textContent = label + ' 기준';
+  if (!typeArr.length) {
+    document.getElementById('r-chart-type').innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:40px 0;text-align:center;">당월 데이터 없음</div>';
+  } else {
+    const cx=100,cy=100,R=80,r=50;
+    let sa=-Math.PI/2, slices='';
+    typeArr.forEach(([type,cnt],i) => {
+      const angle=(cnt/typeTot)*2*Math.PI;
+      const x1=cx+R*Math.cos(sa),y1=cy+R*Math.sin(sa);
+      const x2=cx+R*Math.cos(sa+angle),y2=cy+R*Math.sin(sa+angle);
+      const ix1=cx+r*Math.cos(sa),iy1=cy+r*Math.sin(sa);
+      const ix2=cx+r*Math.cos(sa+angle),iy2=cy+r*Math.sin(sa+angle);
+      const lg=angle>Math.PI?1:0, col=typeColors[i%typeColors.length];
+      const midA=sa+angle/2, lx=cx+(R+14)*Math.cos(midA), ly=cy+(R+14)*Math.sin(midA);
+      const pct=Math.round(cnt/typeTot*100);
+      slices+=`<path d="M${x1},${y1} A${R},${R} 0 ${lg},1 ${x2},${y2} L${ix2},${iy2} A${r},${r} 0 ${lg},0 ${ix1},${iy1} Z" fill="${col}" opacity="0.9"/>`;
+      if(pct>=5) slices+=`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" fill="${col}" font-size="10" font-weight="700" font-family="DM Mono">${pct}%</text>`;
+      sa+=angle;
+    });
+    slices+=`<text x="${cx}" y="${cy-7}" text-anchor="middle" fill="var(--text)" font-size="11" font-family="Noto Sans KR">당월</text>`;
+    slices+=`<text x="${cx}" y="${cy+10}" text-anchor="middle" fill="var(--text)" font-size="18" font-weight="700" font-family="DM Mono">${typeTot}</text>`;
+    slices+=`<text x="${cx}" y="${cy+26}" text-anchor="middle" fill="var(--text-muted)" font-size="10" font-family="Noto Sans KR">건</text>`;
+    const legend=typeArr.map(([t,cnt],i)=>`
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;margin-bottom:6px;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${typeColors[i%typeColors.length]};flex-shrink:0;"></span>
+        <span style="flex:1;color:var(--text);">${t}</span>
+        <span style="font-family:'DM Mono',monospace;color:var(--text-muted);">${cnt}건</span>
+      </div>`).join('');
+    document.getElementById('r-chart-type').innerHTML=`
+      <div style="display:flex;align-items:center;gap:16px;">
+        <svg viewBox="0 0 200 200" width="160" height="160" style="flex-shrink:0;">${slices}</svg>
+        <div style="flex:1;">${legend}</div>
+      </div>`;
+  }
+
+  renderBar('r-chart-occ',   'r-occ-sub',   groupBy(curr,'occurrence'), (k)   => occColorMap[k]||'#9aa5b4');
+  renderBar('r-chart-model', 'r-model-sub', groupBy(curr,'carModel'),   (k,i) => modelColors[i%modelColors.length]);
+  renderBar('r-chart-owner', 'r-owner-sub', groupBy(curr,'owner'),      (k,i) => ownerColors[i%ownerColors.length]);
+
+  // 해당 연도 12개월 추이 SVG
+  const yearMonths = [];
+  for (let m=1; m<=12; m++) {
+    const ymStr = `${reportYear}-${String(m).padStart(2,'0')}`;
+    yearMonths.push({ label:`${m}월`, ym:ymStr, cnt: defects.filter(d=>(d.date||'').startsWith(ymStr)).length });
+  }
+  document.getElementById('r-trend-sub').textContent = `${reportYear}년 월별 현황`;
+
+  const rSvg = document.getElementById('r-trend-svg');
+  if (rSvg) {
+    const W=870, H=100, padT=14, padB=20;
+    const maxVal = Math.max(...yearMonths.map(m=>m.cnt), 1);
+    const n=yearMonths.length;
+    const xs = yearMonths.map((_,i) => Math.round(i/(n-1)*W));
+    const ys = yearMonths.map(m => Math.round(padT + (1-m.cnt/maxVal)*(H-padT-padB)));
+    const pts = xs.map((x,i)=>`${x},${ys[i]}`).join(' ');
+    const fill = `${xs[0]},${H} ${pts} ${xs[n-1]},${H}`;
+    rSvg.innerHTML = `
+      <defs><linearGradient id="rtg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1a56db" stop-opacity="0.15"/>
+        <stop offset="100%" stop-color="#1a56db" stop-opacity="0"/>
+      </linearGradient></defs>
+      <line x1="0" y1="${Math.round(H*0.3)}" x2="${W}" y2="${Math.round(H*0.3)}" stroke="#e4e9f0" stroke-dasharray="4"/>
+      <line x1="0" y1="${Math.round(H*0.62)}" x2="${W}" y2="${Math.round(H*0.62)}" stroke="#e4e9f0" stroke-dasharray="4"/>
+      <polygon points="${fill}" fill="url(#rtg)"/>
+      <polyline points="${pts}" fill="none" stroke="#1a56db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      ${xs.map((x,i)=>`
+        <circle cx="${x}" cy="${ys[i]}" r="${i===reportMonth-1?6:3.5}" fill="#1a56db"
+          ${i===reportMonth-1?'stroke="#fff" stroke-width="2"':''}/>
+        ${yearMonths[i].cnt>0?`<text x="${x}" y="${ys[i]-8}" fill="#1a56db" font-size="9" font-weight="700"
+          text-anchor="${i===0?'start':i===n-1?'end':'middle'}" font-family="DM Mono">${yearMonths[i].cnt}</text>`:''}
+        <text x="${x}" y="${H}" fill="${i===reportMonth-1?'#1a56db':'#9aa5b4'}" font-size="10"
+          font-weight="${i===reportMonth-1?'700':'400'}"
+          text-anchor="${i===0?'start':i===n-1?'end':'middle'}" font-family="DM Mono">${yearMonths[i].label}</text>
+      `).join('')}`;
+  }
+
+  // 발생처별 개별 추이 (해당 연도 12개월)
+  document.getElementById('r-occ-trend-sub').textContent = `${reportYear}년 발생처별 월별 현황`;
+  const rOccWrap = document.getElementById('r-occ-charts-wrap');
+  const occSet = [...new Set(defects.map(d=>d.occurrence||'').filter(Boolean))];
+  if (!occSet.length) { rOccWrap.innerHTML='<div style="color:var(--text-muted);font-size:13px;padding:16px;text-align:center;">데이터 없음</div>'; }
+  else {
+    const W2=440, H2=110, padT2=20, padB2=22, padL=5, padR=15, n2=12;
+    rOccWrap.innerHTML = occSet.map(occ => {
+      const color  = occColorMap[occ]||'#9aa5b4';
+      const counts = yearMonths.map(m => defects.filter(d=>(d.date||'').startsWith(m.ym)&&d.occurrence===occ).length);
+      const maxV   = Math.max(...counts,1);
+      const xs2    = yearMonths.map((_,i) => Math.round(padL + i/(n2-1)*(W2-padL-padR)));
+      const ys2    = counts.map(cnt => Math.round(padT2+(1-cnt/maxV)*(H2-padT2-padB2)));
+      const pts2   = xs2.map((x,i)=>`${x},${ys2[i]}`).join(' ');
+      const fill2  = `${xs2[0]},${H2-padB2} ${pts2} ${xs2[n2-1]},${H2-padB2}`;
+      const total2 = counts.reduce((a,b)=>a+b,0);
+      const gridL  = [0.3,0.65].map(r=>`<line x1="${padL}" y1="${Math.round(padT2+r*(H2-padT2-padB2))}" x2="${W2-padR}" y2="${Math.round(padT2+r*(H2-padT2-padB2))}" stroke="#e4e9f0" stroke-dasharray="3"/>`).join('');
+      const dots   = xs2.map((x,i)=>`
+        <circle cx="${x}" cy="${ys2[i]}" r="${i===reportMonth-1?5:3}" fill="${color}" stroke="#fff" stroke-width="${i===reportMonth-1?2:1}"/>
+        ${counts[i]>0?`<text x="${x}" y="${ys2[i]-8}" fill="${color}" font-size="9" font-weight="700"
+          text-anchor="${i===0?'start':i===n2-1?'end':'middle'}" font-family="DM Mono">${counts[i]}</text>`:''}
+        <text x="${x}" y="${H2}" fill="${i===reportMonth-1?color:'#9aa5b4'}" font-size="9"
+          font-weight="${i===reportMonth-1?'700':'400'}"
+          text-anchor="${i===0?'start':i===n2-1?'end':'middle'}" font-family="DM Mono">${yearMonths[i].label}</text>
+      `).join('');
+      return `
+        <div style="background:var(--bg);border-radius:10px;padding:14px 16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:7px;">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};"></span>
+              <span style="font-size:13px;font-weight:700;color:var(--text);">${occ}</span>
+            </div>
+            <span style="font-size:12px;font-family:'DM Mono',monospace;color:${color};font-weight:700;">연간 ${total2}건</span>
+          </div>
+          <svg width="100%" height="${H2}" viewBox="-5 0 ${W2+10} ${H2}" preserveAspectRatio="none">
+            ${gridL}
+            <polygon points="${fill2}" fill="${color}" opacity="0.08"/>
+            <polyline points="${pts2}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            ${dots}
+          </svg>
+        </div>`;
+    }).join('');
+  }
 
   // 당월 불량 목록
   document.getElementById('r-list-sub').textContent = `${ym} 등록 · ${curr.length}건`;
   const statusKo = { open:'미처리', closed:'완료' };
   document.getElementById('r-tbody').innerHTML = curr.length
-    ? curr.sort((a,b) => (b.date||'').localeCompare(a.date||'')).map(d => `
+    ? [...curr].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(d=>`
         <tr>
           <td>${d.carModel||'-'}</td>
           <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);">${d.partNo||'-'}</td>
@@ -1846,28 +2007,24 @@ function renderReport() {
         </tr>`).join('')
     : '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:20px;">당월 불량 데이터가 없습니다.</td></tr>';
 
-  // 종합 의견 자동 생성
-  const topType  = group('type')[0]?.[0]  || '-';
-  const topModel = group('carModel')[0]?.[0] || '-';
-  const topOcc   = group('occurrence')[0]?.[0] || '-';
-  const openRate = curr.length ? Math.round(open.length / curr.length * 100) : 0;
+  // 종합 의견
+  const topType  = groupBy(curr,'type')[0]?.[0]  || '-';
+  const topModel = groupBy(curr,'carModel')[0]?.[0] || '-';
+  const topOcc   = groupBy(curr,'occurrence')[0]?.[0] || '-';
+  const openRate = curr.length ? Math.round(open.length/curr.length*100) : 0;
   document.getElementById('r-summary').innerHTML = `
-    <strong style="color:var(--text);">💡 ${reportYear}년 ${reportMonth}월 종합 의견</strong><br><br>
+    <strong style="color:var(--text);">💡 ${label} 종합 의견</strong><br><br>
     당월 총 <strong>${curr.length}건</strong>의 불량이 등록되었으며,
     완료 처리율은 <strong style="color:${rate>=80?'var(--success)':'var(--danger)'};">${rate}%</strong>입니다.
-    ${diff > 0
-      ? `전월 대비 <strong style="color:var(--danger);">+${diff}건 증가</strong>하였으므로 원인 분석이 필요합니다.`
-      : diff < 0
-      ? `전월 대비 <strong style="color:var(--success);">${diff}건 감소</strong>하여 개선 추세입니다.`
-      : `전월과 동일한 수준입니다.`}
-    ${curr.length > 0 ? `<br><br>
+    ${diff>0?`전월 대비 <strong style="color:var(--danger);">+${diff}건 증가</strong>하였으므로 원인 분석이 필요합니다.`
+    :diff<0?`전월 대비 <strong style="color:var(--success);">${diff}건 감소</strong>하여 개선 추세입니다.`
+    :`전월과 동일한 수준입니다.`}
+    ${curr.length>0?`<br><br>
     📌 <strong>주요 현황:</strong><br>
     · 최다 불량 유형: <strong>${topType}</strong><br>
     · 최다 발생 모델: <strong>${topModel}</strong><br>
     · 주요 발생처: <strong>${topOcc}</strong><br>
-    ${open.length > 0 ? `· <span style="color:var(--danger);">미처리 ${open.length}건(${openRate}%) 조속한 조치 필요</span>` : '· ✅ 당월 불량 전건 처리 완료'}
-    ` : ''}
-  `;
+    ${open.length>0?`· <span style="color:var(--danger);">미처리 ${open.length}건(${openRate}%) 조속한 조치 필요</span>`:'· ✅ 당월 불량 전건 처리 완료'}`:''}`;
 }
 
 
@@ -1941,6 +2098,16 @@ function updateBadge(){
 }
 
 // ── 모바일 사이드바 토글
+function saveProdQtyFromInput() {
+  const now   = new Date();
+  const thisYM = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const input = document.getElementById('prod-qty-input');
+  if (!input) return;
+  const qty = Number(input.value);
+  if (!qty || qty <= 0) { alert('생산수량을 올바르게 입력해 주세요.'); return; }
+  saveProdQty(thisYM, qty);
+}
+
 function toggleSidebar() {
   const sidebar = document.querySelector('.sidebar');
   const overlay = document.getElementById('sidebar-overlay');

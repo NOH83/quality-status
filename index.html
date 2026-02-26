@@ -496,6 +496,10 @@ tbody tr:hover td { background: #f8faff; }
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  position: sticky;
+  bottom: 0;
+  background: var(--white);
+  z-index: 2;
 }
 
 /* ─── FORM ─── */
@@ -829,7 +833,19 @@ tbody tr:hover td { background: #f8faff; }
     left: 0 !important;
     right: 0 !important;
     max-height: 90vh !important;
+    overflow-y: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .modal-body {
     overflow-y: auto !important;
+    flex: 1 !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .modal-footer {
+    flex-shrink: 0 !important;
+    position: static !important;
+    padding-bottom: 28px !important;
   }
   .modal-overlay { align-items: flex-end !important; }
 
@@ -1033,8 +1049,8 @@ tbody tr:hover td { background: #f8faff; }
       <div class="card" style="margin-bottom:14px;">
         <div class="card-header">
           <div>
-            <div class="card-title">월별 불량 추이</div>
-            <div class="card-sub" id="trend-sub">최근 6개월</div>
+            <div class="card-title">주별 불량 추이</div>
+            <div class="card-sub" id="trend-sub">당월 주별 현황</div>
           </div>
         </div>
         <svg id="trend-svg" width="100%" height="130" viewBox="-15 0 950 130" preserveAspectRatio="none"></svg>
@@ -1044,8 +1060,8 @@ tbody tr:hover td { background: #f8faff; }
       <div class="card" style="margin-bottom:14px;">
         <div class="card-header">
           <div>
-            <div class="card-title">발생처별 월별 추이</div>
-            <div class="card-sub">최근 6개월 · 발생처별 개별 현황</div>
+            <div class="card-title">발생처별 주별 추이</div>
+            <div class="card-sub">당월 주별 · 발생처별 개별 현황</div>
           </div>
         </div>
         <div id="occ-charts-wrap" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"></div>
@@ -1692,28 +1708,69 @@ function renderDashboard() {
     if (card) { const sub = card.querySelector('.card-sub'); if(sub) sub.textContent = label + ' 기준'; }
   });
 
-  // 월별 추이 (6개월)
-  renderTrendSVG((() => {
-    const months = [];
-    for (let i=5;i>=0;i--) {
-      const d  = new Date(now.getFullYear(), now.getMonth()-i, 1);
-      const ym = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-      months.push({ label:`${d.getMonth()+1}월`, ym, cnt: defects.filter(x=>(x.date||'').startsWith(ym)).length });
-    }
-    return months;
-  })());
+  // 주별 추이 (당월)
+  renderTrendSVG(buildWeeks(now));
   renderOccurrenceTrend(now);
 }
 
-function renderTrendSVG(months) {
+// ── 당월 주 목록 생성 (월요일 기준, 해당 월에 속하는 주만)
+function buildWeeks(now) {
+  const year  = now.getFullYear();
+  const month = now.getMonth(); // 0-based
+  const firstDay = new Date(year, month, 1);
+  const lastDay  = new Date(year, month + 1, 0);
+
+  // 첫 번째 월요일 찾기 (월 시작일 이전 포함)
+  const firstMon = new Date(firstDay);
+  const dow = firstDay.getDay(); // 0=일
+  firstMon.setDate(firstDay.getDate() - (dow === 0 ? 6 : dow - 1));
+
+  const weeks = [];
+  let weekNum = 1;
+  let mon = new Date(firstMon);
+
+  while (mon <= lastDay) {
+    const sun = new Date(mon);
+    sun.setDate(sun.getDate() + 6);
+
+    // 실제 해당 주의 시작/끝 (월 범위로 클램프)
+    const rangeStart = mon < firstDay ? firstDay : mon;
+    const rangeEnd   = sun > lastDay  ? lastDay  : sun;
+
+    const monStr = mon.toISOString().slice(0, 10);
+    const sunStr = sun.toISOString().slice(0, 10);
+
+    const cnt = defects.filter(d => {
+      const dt = (d.date || '').slice(0, 10);
+      return dt >= monStr && dt <= sunStr;
+    }).length;
+
+    weeks.push({
+      label:   `${weekNum}주`,
+      monStr,
+      sunStr,
+      cnt
+    });
+
+    weekNum++;
+    mon.setDate(mon.getDate() + 7);
+  }
+  return weeks;
+}
+
+function renderTrendSVG(weeks) {
   const svg = document.getElementById('trend-svg');
   if (!svg) return;
+  const n = weeks.length;
+  if (n < 2) {
+    svg.innerHTML = `<text x="50%" y="50%" text-anchor="middle" fill="#9aa5b4" font-size="13" font-family="Noto Sans KR" dominant-baseline="middle">데이터 없음</text>`;
+    return;
+  }
   const W = 870, H = 100, padT = 14, padB = 20;
-  const maxVal = Math.max(...months.map(m => m.cnt), 1);
-  const n      = months.length;
-  const xs     = months.map((_, i) => Math.round(i / (n-1) * W));
-  const ys     = months.map(m => Math.round(padT + (1 - m.cnt/maxVal) * (H - padT - padB)));
-  const pts    = xs.map((x,i) => `${x},${ys[i]}`).join(' ');
+  const maxVal = Math.max(...weeks.map(w => w.cnt), 1);
+  const xs     = weeks.map((_, i) => Math.round(i / (n - 1) * W));
+  const ys     = weeks.map(w => Math.round(padT + (1 - w.cnt / maxVal) * (H - padT - padB)));
+  const pts    = xs.map((x, i) => `${x},${ys[i]}`).join(' ');
   const fill   = `${xs[0]},${H} ${pts} ${xs[n-1]},${H}`;
 
   svg.innerHTML = `
@@ -1723,65 +1780,58 @@ function renderTrendSVG(months) {
         <stop offset="100%" stop-color="#1a56db" stop-opacity="0"/>
       </linearGradient>
     </defs>
-    <line x1="0" y1="${Math.round(H*0.3)}" x2="${W}" y2="${Math.round(H*0.3)}" stroke="#e4e9f0" stroke-dasharray="4"/>
+    <line x1="0" y1="${Math.round(H*0.3)}"  x2="${W}" y2="${Math.round(H*0.3)}"  stroke="#e4e9f0" stroke-dasharray="4"/>
     <line x1="0" y1="${Math.round(H*0.62)}" x2="${W}" y2="${Math.round(H*0.62)}" stroke="#e4e9f0" stroke-dasharray="4"/>
     <polygon points="${fill}" fill="url(#tg)"/>
     <polyline points="${pts}" fill="none" stroke="#1a56db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    ${xs.map((x,i) => `
-      <circle cx="${x}" cy="${ys[i]}" r="${i===n-1?5:3.5}" fill="#1a56db"
-        ${i===n-1?'stroke="#fff" stroke-width="2"':''}/>
-      ${months[i].cnt > 0 ? `<text x="${x}" y="${ys[i]-8}" fill="#1a56db" font-size="9"
-        text-anchor="${i===0?'start':i===n-1?'end':'middle'}" font-family="DM Mono">${months[i].cnt}</text>` : ''}
+    ${xs.map((x, i) => `
+      <circle cx="${x}" cy="${ys[i]}" r="${i===n-1?5:3.5}" fill="#1a56db" ${i===n-1?'stroke="#fff" stroke-width="2"':''}/>
+      <text x="${x}" y="${ys[i]-8}" fill="#1a56db" font-size="9" font-weight="700"
+        text-anchor="${i===0?'start':i===n-1?'end':'middle'}" font-family="DM Mono">${weeks[i].cnt}</text>
       <text x="${x}" y="${H}" fill="${i===n-1?'#1a56db':'#9aa5b4'}" font-size="10"
-        text-anchor="${i===0?'start':i===n-1?'end':'middle'}" font-family="DM Mono">${months[i].label}</text>
-    `).join('')}
-  `;
+        text-anchor="${i===0?'start':i===n-1?'end':'middle'}" font-family="DM Mono">${weeks[i].label}</text>
+    `).join('')}`;
 }
 
 function renderOccurrenceTrend(now) {
   const wrap = document.getElementById('occ-charts-wrap');
   if (!wrap) return;
 
-  const occColorMap = { '수입검사':'#1a56db', '프레스라인':'#d97706', '조립라인':'#7c3aed', 'PDI':'#057a55', 'HMI 1':'#e02424', 'HMI 2':'#0891b2', '기타':'#9aa5b4' };
+  const occColorMap = {'수입검사':'#1a56db','프레스라인':'#d97706','조립라인':'#7c3aed','PDI':'#057a55','HMI 1':'#e02424','HMI 2':'#0891b2','기타':'#9aa5b4'};
+  const ALL_OCC = ['수입검사','프레스라인','조립라인','PDI','HMI 1','HMI 2'];
 
-  // 최근 6개월
-  const months = [];
-  for (let i = 5; i >= 0; i--) {
-    const d  = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const ym = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    months.push({ label: `${d.getMonth()+1}월`, ym });
-  }
-
-  // 발생처 목록 (데이터에서 추출)
-  const occSet = [...new Set(defects.map(d => d.occurrence||'').filter(Boolean))];
-  if (occSet.length === 0) {
-    wrap.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:16px;text-align:center;">데이터 없음</div>';
-    return;
-  }
-
+  // 당월 주 목록
+  const weeks = buildWeeks(now);
+  const n = weeks.length;
   const W = 440, H = 110, padT = 20, padB = 22, padL = 5, padR = 15;
-  const n = months.length;
 
-  wrap.innerHTML = occSet.map(occ => {
+  wrap.innerHTML = ALL_OCC.map(occ => {
     const color  = occColorMap[occ] || '#9aa5b4';
-    const counts = months.map(m => defects.filter(d => (d.date||'').startsWith(m.ym) && d.occurrence === occ).length);
+    const counts = weeks.map(w =>
+      defects.filter(d => {
+        const dt = (d.date || '').slice(0, 10);
+        return dt >= w.monStr && dt <= w.sunStr && d.occurrence === occ;
+      }).length
+    );
+    const total  = counts.reduce((a, b) => a + b, 0);
     const maxVal = Math.max(...counts, 1);
-    const xs     = months.map((_, i) => Math.round(padL + i / (n-1) * (W - padL - padR)));
-    const ys     = counts.map(cnt => Math.round(padT + (1 - cnt/maxVal) * (H - padT - padB)));
-    const pts    = xs.map((x,i) => `${x},${ys[i]}`).join(' ');
+    const xs     = n < 2
+      ? counts.map((_, i) => Math.round(padL + i / Math.max(n-1,1) * (W - padL - padR)))
+      : counts.map((_, i) => Math.round(padL + i / (n-1) * (W - padL - padR)));
+    const ys     = counts.map(cnt => Math.round(padT + (1 - cnt / maxVal) * (H - padT - padB)));
+    const pts    = xs.map((x, i) => `${x},${ys[i]}`).join(' ');
     const fill   = `${xs[0]},${H-padB} ${pts} ${xs[n-1]},${H-padB}`;
-    const total  = counts.reduce((a,b)=>a+b,0);
 
     const gridLines = [0.3, 0.65].map(r =>
       `<line x1="${padL}" y1="${Math.round(padT + r*(H-padT-padB))}" x2="${W-padR}" y2="${Math.round(padT + r*(H-padT-padB))}" stroke="#e4e9f0" stroke-dasharray="3"/>`
     ).join('');
 
-    const dots = xs.map((x,i) => `
+    const dots = xs.map((x, i) => `
       <circle cx="${x}" cy="${ys[i]}" r="3.5" fill="${color}" stroke="#fff" stroke-width="1.5"/>
-      ${counts[i] > 0 ? `<text x="${x}" y="${ys[i]-8}" fill="${color}" font-size="10" font-weight="700"
-        text-anchor="${i===0?'start':i===n-1?'end':'middle'}" font-family="DM Mono">${counts[i]}</text>` : ''}
+      <text x="${x}" y="${ys[i]-8}" fill="${color}" font-size="10" font-weight="700"
+        text-anchor="${i===0?'start':i===n-1?'end':'middle'}" font-family="DM Mono">${counts[i]}</text>
       <text x="${x}" y="${H}" fill="${i===n-1?color:'#9aa5b4'}" font-size="10"
-        text-anchor="${i===0?'start':i===n-1?'end':'middle'}" font-family="DM Mono">${months[i].label}</text>
+        text-anchor="${i===0?'start':i===n-1?'end':'middle'}" font-family="DM Mono">${weeks[i].label}</text>
     `).join('');
 
     return `
@@ -1791,12 +1841,12 @@ function renderOccurrenceTrend(now) {
             <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};"></span>
             <span style="font-size:13px;font-weight:700;color:var(--text);">${occ}</span>
           </div>
-          <span style="font-size:12px;font-family:'DM Mono',monospace;color:${color};font-weight:700;">누계 ${total}건</span>
+          <span style="font-size:12px;font-family:'DM Mono',monospace;color:${total>0?color:'var(--text-muted)'};font-weight:700;">당월 ${total}건</span>
         </div>
         <svg width="100%" height="${H}" viewBox="-5 0 ${W+10} ${H}" preserveAspectRatio="none">
           ${gridLines}
-          <polygon points="${fill}" fill="${color}" opacity="0.08"/>
-          <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <polygon points="${fill}" fill="${color}" opacity="${total>0?'0.08':'0.03'}"/>
+          <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="${total>0?'1':'0.3'}"/>
           ${dots}
         </svg>
       </div>`;

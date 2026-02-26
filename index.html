@@ -665,6 +665,184 @@ tbody tr:hover td { background: #f8faff; }
   pointer-events: none;
 }
 .upload-overlay.active { display: flex; }
+
+/* ══════════════════════════════════════
+   모바일 반응형
+══════════════════════════════════════ */
+
+/* 햄버거 버튼 */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  flex-direction: column;
+  gap: 5px;
+}
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: all 0.25s;
+}
+
+/* 사이드바 오버레이 (모바일) */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 199;
+}
+.sidebar-overlay.active { display: block; }
+
+/* 하단 탭바 */
+.mobile-tabbar {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  z-index: 150;
+  justify-content: space-around;
+  align-items: center;
+}
+.mobile-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 6px 0;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  transition: color 0.15s;
+  position: relative;
+}
+.mobile-tab.active { color: var(--accent); }
+.mobile-tab-icon { font-size: 20px; line-height: 1; }
+.mobile-tab-badge {
+  position: absolute;
+  top: 4px;
+  right: calc(50% - 18px);
+  background: var(--danger);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 99px;
+  font-family: 'DM Mono', monospace;
+}
+
+/* 모바일 등록 FAB 버튼 */
+.fab-btn {
+  display: none;
+  position: fixed;
+  bottom: 72px;
+  right: 18px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  border: none;
+  cursor: pointer;
+  z-index: 149;
+  box-shadow: 0 4px 16px rgba(26,86,219,0.35);
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  /* 레이아웃 */
+  body { overflow: auto; flex-direction: column; }
+
+  /* 사이드바: 슬라이드 오버레이 */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  }
+  .sidebar.open { transform: translateX(0); }
+
+  /* 메인 */
+  .main { width: 100%; min-height: 100vh; }
+
+  /* 탑바 */
+  .topbar {
+    padding: 0 14px;
+    height: 52px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-left h2 { font-size: 15px; }
+  .topbar-right .btn-ghost { display: none; } /* 내보내기 숨김 */
+  .topbar-right .btn-primary { display: none; } /* 상단 등록 버튼 숨김 (FAB로 대체) */
+
+  /* 햄버거 표시 */
+  .hamburger { display: flex; }
+
+  /* 콘텐츠 여백 (하단 탭바 공간) */
+  .content { padding: 16px 14px 80px; }
+
+  /* KPI 그리드: 2열 */
+  .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi-card { padding: 14px; }
+  .kpi-value { font-size: 24px !important; }
+  .kpi-label { font-size: 11px !important; }
+  .kpi-sub   { font-size: 11px !important; }
+
+  /* 차트 그리드: 1열 */
+  .grid-2 { grid-template-columns: 1fr; gap: 10px; }
+  .grid-3 { grid-template-columns: 1fr; gap: 10px; }
+
+  /* 테이블 가로 스크롤 */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 700px; }
+
+  /* 필터 행 */
+  .filter-row { flex-wrap: wrap; gap: 8px; }
+  .search-wrap { width: 100%; }
+  .search-input { width: 100%; }
+
+  /* 모달 전체화면 */
+  .modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 16px 16px 0 0 !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+  .modal-overlay { align-items: flex-end !important; }
+
+  /* 하단 탭바·FAB 표시 */
+  .mobile-tabbar { display: flex; }
+  .fab-btn { display: flex; }
+
+  /* 발생처 개별 차트 1열 */
+  #occ-charts-wrap { grid-template-columns: 1fr !important; }
+
+  /* sync-chip 위치 조정 */
+  .sync-chip { bottom: 70px; }
+}
 </style>
 </head>
 <body>
@@ -674,6 +852,29 @@ tbody tr:hover td { background: #f8faff; }
   <span class="poll-dot"></span>
   자동 동기화 중 · <span id="poll-countdown">60</span>초 후 갱신
 </div>
+
+<!-- 사이드바 오버레이 (모바일) -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- 하단 탭바 (모바일) -->
+<div class="mobile-tabbar">
+  <div class="mobile-tab active" id="mob-tab-home" onclick="goPage('home',null);setMobTab('home')">
+    <span class="mobile-tab-icon">📊</span>
+    <span>대시보드</span>
+  </div>
+  <div class="mobile-tab" id="mob-tab-defects" onclick="goPage('defects',null);setMobTab('defects')">
+    <span class="mobile-tab-icon">🔴</span>
+    <span>불량 관리</span>
+    <span class="mobile-tab-badge" id="mob-open-badge"></span>
+  </div>
+  <div class="mobile-tab" id="mob-tab-report" onclick="goPage('report',null);setMobTab('report')">
+    <span class="mobile-tab-icon">📄</span>
+    <span>보고서</span>
+  </div>
+</div>
+
+<!-- FAB 등록 버튼 (모바일) -->
+<button class="fab-btn" onclick="openModal()" aria-label="불량 등록">＋</button>
 
 <!-- ─── SIDEBAR ─── -->
 <div class="sidebar">
@@ -718,9 +919,14 @@ tbody tr:hover td { background: #f8faff; }
 
   <!-- TOPBAR -->
   <div class="topbar">
-    <div class="topbar-left">
-      <h2 id="page-title">📊 대시보드</h2>
-      <div class="breadcrumb" id="page-sub">품질 현황 · 2025년 2월</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="hamburger" onclick="toggleSidebar()" aria-label="메뉴">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="topbar-left">
+        <h2 id="page-title">📊 대시보드</h2>
+        <div class="breadcrumb" id="page-sub">품질 현황 · 2025년 2월</div>
+      </div>
     </div>
     <div class="topbar-right">
       <button class="btn btn-ghost btn-sm">📥 내보내기</button>
@@ -1306,12 +1512,13 @@ function goPage(name, el) {
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   if(el) el.classList.add('active');
-  else document.querySelector(`[onclick*="'${name}'"]`).classList.add('active');
+  else { const nav = document.querySelector(`[onclick*="'${name}'"]`); if(nav) nav.classList.add('active'); }
   document.getElementById('page-title').textContent = pageInfo[name].title;
   document.getElementById('page-sub').textContent   = pageInfo[name].sub;
   if(name==='defects') renderTable();
   if(name==='home')    renderDashboard();
   if(name==='report')  renderReport();
+  setMobTab(name);
 }
 
 // ══ HOME ══
@@ -1727,7 +1934,28 @@ async function toggleStatus(partNo){
 }
 
 function updateBadge(){
-  document.getElementById('open-badge').textContent=defects.filter(d=>d.status==='open').length;
+  const cnt = defects.filter(d=>d.status==='open').length;
+  document.getElementById('open-badge').textContent = cnt;
+  const mobBadge = document.getElementById('mob-open-badge');
+  if (mobBadge) mobBadge.textContent = cnt > 0 ? cnt : '';
+}
+
+// ── 모바일 사이드바 토글
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const isOpen  = sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', !isOpen);
+  overlay.classList.toggle('active', !isOpen);
+}
+
+// ── 모바일 탭바 활성화
+function setMobTab(name) {
+  document.querySelectorAll('.mobile-tab').forEach(t => t.classList.remove('active'));
+  const el = document.getElementById('mob-tab-' + name);
+  if (el) el.classList.add('active');
+  const sidebar = document.querySelector('.sidebar');
+  if (sidebar.classList.contains('open')) toggleSidebar();
 }
 
 // ══ DETAIL ══

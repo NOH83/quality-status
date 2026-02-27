@@ -1088,16 +1088,17 @@ tbody tr:hover td { background: #f8faff; }
           <table>
             <thead>
               <tr>
+                <th style="width:40px;"></th>
                 <th>차종</th>
                 <th>품번</th>
-                <th>품목명</th>
+                <th>ASSY품목명</th>
                 <th>불량 유형</th>
                 <th>발생처</th>
                 <th>수량</th>
                 <th>귀책처</th>
                 <th>등록일</th>
                 <th>불량 내용</th>
-                <th>편집</th>
+                <th>비고</th>
               </tr>
             </thead>
             <tbody id="defect-tbody"></tbody>
@@ -1318,6 +1319,10 @@ tbody tr:hover td { background: #f8faff; }
         <textarea class="form-textarea" id="f-desc" placeholder="불량 현상, 위치, 발생 상황 등 상세 내용을 입력하세요."></textarea>
       </div>
       <div class="form-group">
+        <label class="form-label">비고</label>
+        <input class="form-input" id="f-remark" placeholder="기타 특이사항 입력">
+      </div>
+      <div class="form-group">
         <label class="form-label">사진 첨부 <span style="color:var(--text-light);font-weight:400;">(최대 3장)</span></label>
         <input type="file" id="f-photos" accept="image/*" multiple style="display:none;" onchange="handlePhotos(this)">
         <div class="photo-grid" id="photo-grid">
@@ -1454,6 +1459,10 @@ tbody tr:hover td { background: #f8faff; }
       <div class="form-group">
         <label class="form-label">불량 내용</label>
         <textarea class="form-textarea" id="e-desc" placeholder="불량 현상, 위치, 발생 상황 등 상세 내용을 입력하세요."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">비고</label>
+        <input class="form-input" id="e-remark" placeholder="기타 특이사항 입력">
       </div>
     </div>
     <div class="modal-footer" style="justify-content:space-between;">
@@ -2148,9 +2157,10 @@ function getFiltered() {
 
 function renderTable() {
   const list=getFiltered(), tbody=document.getElementById('defect-tbody');
-  if(!list.length){ tbody.innerHTML=`<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">🔍</div><p>해당하는 불량이 없습니다.</p></div></td></tr>`; return; }
+  if(!list.length){ tbody.innerHTML=`<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">🔍</div><p>해당하는 불량이 없습니다.</p></div></td></tr>`; return; }
   tbody.innerHTML=list.map((d,i)=>`
     <tr data-partno="${encodeURIComponent(d.partNo)}" class="defect-row">
+      <td><button class="btn btn-sm edit-btn" data-partno="${encodeURIComponent(d.partNo)}" style="background:var(--accent-light);color:var(--accent);border:1px solid #c7d7ff;padding:4px 7px;">✏️</button></td>
       <td style="font-weight:600;">${d.carModel||'-'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);">${d.partNo||'-'}</td>
       <td style="font-weight:600;">${d.item}</td>
@@ -2160,7 +2170,7 @@ function renderTable() {
       <td>${d.owner||'-'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;">${(d.date||'').slice(0,10)}</td>
       <td style="font-size:12px;color:var(--text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.desc||'-'}</td>
-      <td><button class="btn btn-sm edit-btn" data-partno="${encodeURIComponent(d.partNo)}" style="background:var(--accent-light);color:var(--accent);border:1px solid #c7d7ff;">✏️ 편집</button></td>
+      <td style="font-size:12px;color:var(--text-muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.remark||'-'}</td>
     </tr>`).join('');
   updateBadge();
 
@@ -2236,6 +2246,7 @@ function openDetail(partNo){
     <div class="detail-row"><div class="detail-key">귀책처</div><div class="detail-val">${d.owner}</div></div>
     <div class="detail-row"><div class="detail-key">등록일</div><div class="detail-val">${(d.date||"").slice(0,10)}</div></div>
     <div class="detail-row"><div class="detail-key">불량 내용</div><div class="detail-val" style="line-height:1.7;">${d.desc}</div></div>
+    ${d.remark?`<div class="detail-row"><div class="detail-key">비고</div><div class="detail-val">${d.remark}</div></div>`:``}
   `;
   const btn=document.getElementById('detail-action-btn');
   btn.textContent=d.status==='open'?'✅ 완료 처리':'🔄 미처리로 변경';
@@ -2248,7 +2259,7 @@ function closeDetail(){ document.getElementById('modal-detail').classList.remove
 
 // ══ 불량 등록 ══
 function openModal(){
-  ['f-carmodel','f-partno','f-item','f-owner','f-desc','f-qty'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['f-carmodel','f-partno','f-item','f-owner','f-desc','f-qty','f-remark'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   uploadedPhotos=[]; renderPhotoGrid();
   document.getElementById('modal-reg').classList.add('open');
   const fab = document.querySelector('.fab-btn');
@@ -2275,6 +2286,7 @@ async function submitDefect(){
     owner:      document.getElementById('f-owner').value||'미지정',
     status:     'open',
     desc:       document.getElementById('f-desc').value||'-',
+    remark:     document.getElementById('f-remark').value||'',
     photos:     [...uploadedPhotos],
   };
   defects.unshift(d); uploadedPhotos=[];
@@ -2295,6 +2307,7 @@ function openEditModal(id){
   document.getElementById('e-qty').value      = d.qty||'';
   document.getElementById('e-owner').value    = d.owner||'';
   document.getElementById('e-desc').value     = d.desc||'';
+  document.getElementById('e-remark').value   = d.remark||'';
   document.getElementById('e-date').value     = (d.date||'').slice(0,10);
   setSelectVal('e-type',d.type); setSelectVal('e-sev',d.occurrence);
   setSelectVal('e-status',d.status);
@@ -2322,7 +2335,7 @@ async function saveEdit(){
   d.type=document.getElementById('e-type').value; d.occurrence=document.getElementById('e-sev').value;
   d.qty=document.getElementById('e-qty').value||'-';
   d.owner=document.getElementById('e-owner').value||'미지정'; d.status=document.getElementById('e-status').value;
-  d.date=document.getElementById('e-date').value; d.desc=document.getElementById('e-desc').value||'-';
+  d.date=document.getElementById('e-date').value; d.desc=document.getElementById('e-desc').value||'-'; d.remark=document.getElementById('e-remark').value||'';
   closeEditModal(); renderTable(); renderHomeDefects(); updateBadge(); renderDashboard();
   await sheetUpdate(d);
   showToast('success','수정 완료',`${d.item}${GAS_URL?' · Sheets 저장됨':''}`);

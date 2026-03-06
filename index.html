@@ -941,7 +941,7 @@ tbody tr:hover td { background: #f8faff; }
       </button>
       <div class="topbar-left">
         <h2 id="page-title">📊 대시보드</h2>
-        <div class="breadcrumb" id="page-sub">품질 현황 · 2025년 2월</div>
+        <div class="breadcrumb" id="page-sub">품질 현황</div>
       </div>
     </div>
     <div class="topbar-right">
@@ -1612,9 +1612,9 @@ let uploadedPhotos=[];
 
 // ══ NAVIGATION ══
 const pageInfo = {
-  home:    { title:'📊 대시보드',        sub:'품질 현황 · 2025년 2월' },
+  home:    { title:'📊 대시보드',        sub:(() => { const n=new Date(); return `품질 현황 · ${n.getFullYear()}년 ${n.getMonth()+1}월`; })() },
   defects: { title:'🔴 불량 관리',       sub:'등록 및 추적' },
-  report:  { title:'📄 월간 보고서',     sub:'2025년 2월 품질 실적' },
+  report:  { title:'📄 월간 보고서',     sub:(() => { const n=new Date(); return `${n.getFullYear()}년 ${n.getMonth()+1}월 품질 실적`; })() },
 };
 
 function goPage(name, el) {

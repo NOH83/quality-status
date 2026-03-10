@@ -1168,6 +1168,7 @@ tbody tr:hover td { background: #f8faff; }
                 <th>발생처<br><span style="font-size:10px;font-weight:400;opacity:.7;">Occurrence</span></th>
                 <th>귀책처<br><span style="font-size:10px;font-weight:400;opacity:.7;">Responsibility</span></th>
                 <th>등록일<br><span style="font-size:10px;font-weight:400;opacity:.7;">Date</span></th>
+                <th style="width:52px;text-align:center;">사진<br><span style="font-size:10px;font-weight:400;opacity:.7;">Photo</span></th>
                 <th>불량 내용<br><span style="font-size:10px;font-weight:400;opacity:.7;">Description</span></th>
                 <th>수량<br><span style="font-size:10px;font-weight:400;opacity:.7;">Qty</span></th>
                 <th>비고<br><span style="font-size:10px;font-weight:400;opacity:.7;">Remark</span></th>
@@ -1546,6 +1547,15 @@ tbody tr:hover td { background: #f8faff; }
         <label class="form-label">비고 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Remark</span></label>
         <input class="form-input" id="e-remark" placeholder="기타 특이사항 입력">
       </div>
+      <div class="form-group">
+        <label class="form-label">사진 첨부 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Photo (max 3)</span></label>
+        <input type="file" id="e-photos" accept="image/*" multiple style="display:none;" onchange="handleEditPhotos(this)">
+        <div class="photo-grid" id="edit-photo-grid">
+          <div class="photo-add-btn" onclick="document.getElementById('e-photos').click()">
+            <span style="font-size:22px;">📷</span><span>사진 추가</span>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="modal-footer" style="justify-content:space-between;">
       <button class="btn btn-danger btn-sm" onclick="deleteDefect()">🗑 삭제 <span style="font-size:10px;opacity:.8;">Delete</span></button>
@@ -1578,7 +1588,14 @@ let defects = [
 
 // ══ GOOGLE SHEETS 연동 ══════════════════════════════
 
-function stripPhotos(d) { const {photos,_row,...rest}=d; return rest; }
+function stripPhotos(d) {
+  const {photos, _row, ...rest} = d;
+  // 사진 URL들을 쉼표로 구분해서 photos 컬럼에 저장
+  const photoUrls = Array.isArray(photos)
+    ? photos.map(p => p.url || p).filter(u => u && !u.startsWith('data:')).join('|')
+    : '';
+  return { ...rest, photos: photoUrls };
+}
 
 async function sheetLoad() {
   if (!GAS_URL) return;
@@ -1594,7 +1611,12 @@ async function sheetLoad() {
 
     if (!json.ok) throw new Error(json.error);
     if (json.data.length > 0) {
-      defects = json.data.map(d => ({ ...d, photos:[] }));
+      defects = json.data.map(d => ({
+    ...d,
+    photos: d.photos
+      ? String(d.photos).split('|').filter(Boolean).map(url => ({ url, thumb: url }))
+      : []
+  }));
     }
     if (prodJson.ok && prodJson.data) {
       productionData = {};
@@ -2305,17 +2327,31 @@ function renderTable() {
       <td>${biLang(d.occurrence)||'-'}</td>
       <td>${biLang(d.owner)||'-'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;">${(d.date||'').slice(0,10)}</td>
+      <td style="text-align:center;">
+        ${Array.isArray(d.photos)&&d.photos.length
+          ? `<span class="photo-icon-btn" data-partno="${encodeURIComponent(d.partNo)}" title="${d.photos.length}장" style="cursor:pointer;font-size:20px;display:inline-block;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform='scale(1)'">📷</span><span style="font-size:10px;color:var(--text-muted);display:block;line-height:1.2;font-weight:600;">${d.photos.length}장</span>`
+          : '<span style="color:var(--border-dark);font-size:16px;">—</span>'}
+      </td>
       <td style="font-size:12px;color:var(--text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.desc||'-'}</td>
       <td style="font-family:'DM Mono',monospace;text-align:center;">${d.qty||'-'}</td>
       <td style="font-size:12px;color:var(--text-muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.remark||'-'}</td>
     </tr>`).join('');
   updateBadge();
 
-  // 편집 버튼만 이벤트 처리
+  // 클릭 이벤트 처리
   tbody.onclick = function(e) {
     const editBtn = e.target.closest('.edit-btn');
     if (editBtn) {
       openEditModal(decodeURIComponent(editBtn.dataset.partno));
+      return;
+    }
+    const photoBtn = e.target.closest('.photo-icon-btn');
+    if (photoBtn) {
+      e.stopPropagation();
+      const partNo = decodeURIComponent(photoBtn.dataset.partno);
+      const d = defects.find(x => x.partNo === partNo);
+      if (d) openPhotoViewer(d);
+      return;
     }
   };
 }
@@ -2383,7 +2419,14 @@ function openDetail(partNo){
     <div class="detail-row"><div class="detail-key">귀책처<br><span style="font-size:10px;opacity:.6;">Responsibility</span></div><div class="detail-val">${d.owner}${KO_EN[d.owner]?'<br><span style="font-size:11px;color:var(--text-muted);">'+KO_EN[d.owner]+'</span>':''}</div></div>
     <div class="detail-row"><div class="detail-key">등록일<br><span style="font-size:10px;opacity:.6;">Date</span></div><div class="detail-val">${(d.date||"").slice(0,10)}</div></div>
     <div class="detail-row"><div class="detail-key">불량 내용<br><span style="font-size:10px;opacity:.6;">Description</span></div><div class="detail-val" style="line-height:1.7;">${d.desc}</div></div>
-    ${d.remark?`<div class="detail-row"><div class="detail-key">비고<br><span style="font-size:10px;opacity:.6;">Remark</span></div><div class="detail-val">${d.remark}</div></div>`:``}
+    ${d.remark?`<div class="detail-row"><div class="detail-key">비고<br><span style="font-size:10px;opacity:.6;">Remark</span></div><div class="detail-val">${d.remark}</div></div>`:''}
+    ${Array.isArray(d.photos)&&d.photos.length?`
+    <div style="margin-top:14px;">
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:600;">사진 Photo</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        ${d.photos.map(p=>{const url=p.url||p;const thumb=p.thumb||url;return `<img src="${thumb}" onclick="viewPhoto('${url}')" style="width:90px;height:90px;border-radius:10px;object-fit:cover;cursor:zoom-in;border:2px solid var(--border);">`;}).join('')}
+      </div>
+    </div>`:''}
   `;
   const btn=document.getElementById('detail-action-btn');
   btn.textContent=d.status==='open'?'✅ 완료 처리 (Done)':'🔄 미처리로 변경 (Reopen)';
@@ -2448,6 +2491,9 @@ function openEditModal(id){
   document.getElementById('e-date').value     = (d.date||'').slice(0,10);
   setSelectVal('e-type',d.type); setSelectVal('e-sev',d.occurrence);
   setSelectVal('e-status',d.status);
+  // 기존 사진 불러오기
+  uploadedPhotos = Array.isArray(d.photos) ? d.photos.map(p => typeof p === 'string' ? {url:p,thumb:p} : p) : [];
+  renderEditPhotoGrid();
   document.getElementById('modal-edit').classList.add('open');
   const fab = document.querySelector('.fab-btn');
   if (fab) fab.style.display = 'none';
@@ -2473,6 +2519,7 @@ async function saveEdit(){
   d.qty=document.getElementById('e-qty').value||'-';
   d.owner=document.getElementById('e-owner').value||'미지정'; d.status=document.getElementById('e-status').value;
   d.date=document.getElementById('e-date').value; d.desc=document.getElementById('e-desc').value||'-'; d.remark=document.getElementById('e-remark').value||'';
+  d.photos=[...uploadedPhotos];
   closeEditModal(); renderTable(); renderHomeDefects(); updateBadge(); renderDashboard();
   await sheetUpdate(d);
   showToast('success','수정 완료',`${d.item}${GAS_URL?' · Sheets 저장됨':''}`);
@@ -2564,14 +2611,144 @@ function showToast(type,title,msg,duration=4000){
   setTimeout(()=>{ el.classList.add('fade-out'); setTimeout(()=>el.remove(),300); },duration);
 }
 
-// ══ 사진 첨부 ══
-function handlePhotos(input){ const files=Array.from(input.files).slice(0,3-uploadedPhotos.length); files.forEach(f=>{ const r=new FileReader(); r.onload=e=>{uploadedPhotos.push(e.target.result);renderPhotoGrid();}; r.readAsDataURL(f); }); input.value=''; }
-function removePhoto(i){ uploadedPhotos.splice(i,1); renderPhotoGrid(); }
-function renderPhotoGrid(){
-  const grid=document.getElementById('photo-grid');
-  let html=uploadedPhotos.map((src,i)=>`<div class="photo-thumb-wrap"><img src="${src}"><div class="photo-remove" onclick="removePhoto(${i})">✕</div></div>`).join('');
-  if(uploadedPhotos.length<3) html+=`<div class="photo-add-btn" onclick="document.getElementById('f-photos').click()"><span style="font-size:22px;">📷</span><span>${uploadedPhotos.length===0?'사진 추가':'추가'}</span></div>`;
-  grid.innerHTML=html;
+// ══ 사진 첨부 (imgbb 업로드) ══
+async function uploadToImgbb(file) {
+  const formData = new FormData();
+  formData.append('image', file);
+  try {
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+      method: 'POST', body: formData
+    });
+    const json = await res.json();
+    if (json.success) return { url: json.data.url, thumb: json.data.thumb.url, display: json.data.display_url };
+    throw new Error(json.error?.message || '업로드 실패');
+  } catch(e) {
+    showToast('error', '사진 업로드 실패', e.message);
+    return null;
+  }
+}
+
+function handlePhotos(input) {
+  const files = Array.from(input.files).slice(0, 3 - uploadedPhotos.length);
+  if (!files.length) return;
+  input.value = '';
+
+  files.forEach(async (file) => {
+    // 미리보기용 임시 base64 표시
+    const tempId = 'temp_' + Date.now() + Math.random();
+    const reader = new FileReader();
+    reader.onload = e => {
+      uploadedPhotos.push({ url: e.target.result, thumb: e.target.result, _tempId: tempId, _uploading: true });
+      renderPhotoGrid();
+    };
+    reader.readAsDataURL(file);
+
+    // imgbb 실제 업로드
+    const result = await uploadToImgbb(file);
+    const idx = uploadedPhotos.findIndex(p => p._tempId === tempId);
+    if (idx !== -1) {
+      if (result) {
+        uploadedPhotos[idx] = { url: result.url, thumb: result.thumb, display: result.display };
+        showToast('success', '사진 업로드 완료', '');
+      } else {
+        uploadedPhotos.splice(idx, 1);
+      }
+      renderPhotoGrid();
+    }
+  });
+}
+
+function removePhoto(i) { uploadedPhotos.splice(i, 1); renderPhotoGrid(); }
+
+function renderPhotoGrid() {
+  const grid = document.getElementById('photo-grid');
+  if (!grid) return;
+  let html = uploadedPhotos.map((p, i) => {
+    const src = p.thumb || p.url || p;
+    const uploading = p._uploading;
+    return `<div class="photo-thumb-wrap" style="position:relative;">
+      <img src="${src}" style="width:80px;height:80px;border-radius:10px;object-fit:cover;display:block;${uploading?'opacity:.5;':''}" onclick="viewPhoto('${p.url||p}')">
+      ${uploading ? '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;">⏳</div>' : ''}
+      <div class="photo-remove" onclick="removePhoto(${i})">✕</div>
+    </div>`;
+  }).join('');
+  if (uploadedPhotos.length < 3) html += `<div class="photo-add-btn" onclick="document.getElementById('f-photos').click()"><span style="font-size:22px;">📷</span><span>${uploadedPhotos.length===0?'사진 추가':'추가'}</span></div>`;
+  grid.innerHTML = html;
+}
+
+
+function openPhotoViewer(d) {
+  const photos = Array.isArray(d.photos) ? d.photos : [];
+  if (!photos.length) return;
+  let cur = 0;
+  const ov = document.createElement('div');
+  ov.id = 'photo-viewer-ov';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;';
+
+  function render() {
+    const p = photos[cur];
+    const url = p.url || p;
+    ov.innerHTML = `
+      <div style="color:rgba(255,255,255,.5);font-size:12px;">${d.partNo} · ${cur+1} / ${photos.length}</div>
+      <img src="${url}" style="max-width:88vw;max-height:72vh;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.6);object-fit:contain;">
+      <div style="display:flex;gap:16px;align-items:center;">
+        ${photos.length>1 ? `<button onclick="event.stopPropagation();curPhoto(-1)" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;">‹</button>` : ''}
+        <a href="${url}" target="_blank" style="color:#4a9eff;font-size:12px;text-decoration:none;">🔗 원본 보기</a>
+        ${photos.length>1 ? `<button onclick="event.stopPropagation();curPhoto(1)" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;">›</button>` : ''}
+      </div>
+      <button onclick="document.getElementById('photo-viewer-ov').remove()" style="background:rgba(255,255,255,.12);border:none;color:#fff;border-radius:8px;padding:8px 20px;font-size:13px;cursor:pointer;">✕ 닫기 Close</button>
+    `;
+  }
+  window.curPhoto = (dir) => { cur = (cur + dir + photos.length) % photos.length; render(); };
+  ov.onclick = (e) => { if (e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+  render();
+}
+
+function viewPhoto(url) {
+  if (!url || url.startsWith('data:')) return;
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:zoom-out;';
+  ov.innerHTML = `<img src="${url}" style="max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.6);">`;
+  ov.onclick = () => ov.remove();
+  document.body.appendChild(ov);
+}
+
+
+function handleEditPhotos(input) {
+  const files = Array.from(input.files).slice(0, 3 - uploadedPhotos.length);
+  input.value = '';
+  files.forEach(async (file) => {
+    const tempId = 'temp_' + Date.now() + Math.random();
+    const reader = new FileReader();
+    reader.onload = e => { uploadedPhotos.push({ url: e.target.result, thumb: e.target.result, _tempId: tempId, _uploading: true }); renderEditPhotoGrid(); };
+    reader.readAsDataURL(file);
+    const result = await uploadToImgbb(file);
+    const idx = uploadedPhotos.findIndex(p => p._tempId === tempId);
+    if (idx !== -1) {
+      if (result) { uploadedPhotos[idx] = { url: result.url, thumb: result.thumb, display: result.display }; showToast('success','사진 업로드 완료',''); }
+      else uploadedPhotos.splice(idx, 1);
+      renderEditPhotoGrid();
+    }
+  });
+}
+
+function removeEditPhoto(i) { uploadedPhotos.splice(i, 1); renderEditPhotoGrid(); }
+
+function renderEditPhotoGrid() {
+  const grid = document.getElementById('edit-photo-grid');
+  if (!grid) return;
+  let html = uploadedPhotos.map((p, i) => {
+    const src = p.thumb || p.url || p;
+    const uploading = p._uploading;
+    return `<div class="photo-thumb-wrap" style="position:relative;">
+      <img src="${src}" style="width:80px;height:80px;border-radius:10px;object-fit:cover;display:block;${uploading?'opacity:.5;':''}" onclick="viewPhoto('${p.url||p}')">
+      ${uploading ? '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;">⏳</div>' : ''}
+      <div class="photo-remove" onclick="removeEditPhoto(${i})">✕</div>
+    </div>`;
+  }).join('');
+  if (uploadedPhotos.length < 3) html += `<div class="photo-add-btn" onclick="document.getElementById('e-photos').click()"><span style="font-size:22px;">📷</span><span>${uploadedPhotos.length===0?'사진 추가':'추가'}</span></div>`;
+  grid.innerHTML = html;
 }
 
 // ══ 드래그 앤 드롭 ══
@@ -2672,6 +2849,7 @@ async function silentSheetLoad() {
 
 // ══ 비밀번호 잠금 ══
 const APP_PASSWORD = '1234';  // ← 여기서 비밀번호 변경
+const IMGBB_API_KEY = '059ba8bb1cbc2c1e054a4bbd48876210'; // imgbb API 키
 
 function checkPassword() {
   const val = document.getElementById('lock-input').value;

@@ -1611,12 +1611,18 @@ async function sheetLoad() {
 
     if (!json.ok) throw new Error(json.error);
     if (json.data.length > 0) {
-      defects = json.data.map(d => ({
-    ...d,
-    photos: d.photos
-      ? String(d.photos).split('|').filter(Boolean).map(url => ({ url, thumb: url }))
-      : []
-  }));
+      defects = json.data.map(d => {
+        // Sheets에서 온 photos URL 복원
+        let photos = [];
+        if (d.photos && String(d.photos).trim()) {
+          photos = String(d.photos).split('|').filter(Boolean).map(url => ({ url, thumb: url }));
+        } else {
+          // Sheets에 photos 없으면 기존 메모리 데이터 유지
+          const existing = defects.find(x => x.partNo === d.partNo);
+          photos = (existing && Array.isArray(existing.photos)) ? existing.photos : [];
+        }
+        return { ...d, photos };
+      });
     }
     if (prodJson.ok && prodJson.data) {
       productionData = {};

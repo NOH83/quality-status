@@ -308,7 +308,9 @@ body {
 .badge.closed { background: #f1f5f9; color: var(--text-muted); }
 
 /* ─── TABLE ─── */
+
 .table-wrap { overflow-x: auto; }
+
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 thead th {
   text-align: left;
@@ -941,7 +943,7 @@ tbody tr:hover td { background: #f8faff; }
 <div class="mobile-tabbar">
   <div class="mobile-tab active" id="mob-tab-home" onclick="goPage('home',null);setMobTab('home')">
     <span class="mobile-tab-icon">📊</span>
-    <span>대시보드</span>
+    <span>품질 현황</span>
   </div>
   <div class="mobile-tab" id="mob-tab-defects" onclick="goPage('defects',null);setMobTab('defects')">
     <span class="mobile-tab-icon">🔴</span>
@@ -964,7 +966,7 @@ tbody tr:hover td { background: #f8faff; }
   </div>
   <div class="sidebar-section-label">메뉴 · Menu</div>
   <div class="nav-item active" onclick="goPage('home',this)">
-    <span class="nav-icon">📊</span> 대시보드<br><span style="font-size:11px;font-weight:400;opacity:.6;padding-left:22px;">Dashboard</span>
+    <span class="nav-icon">📊</span> 품질 현황<br><span style="font-size:11px;font-weight:400;opacity:.6;padding-left:22px;">Quality Status</span>
   </div>
   <div class="nav-item" onclick="goPage('defects',this)">
     <span class="nav-icon">🔴</span> 불량 관리<br><span style="font-size:11px;font-weight:400;opacity:.6;padding-left:22px;">Defect Mgmt</span>
@@ -1003,7 +1005,7 @@ tbody tr:hover td { background: #f8faff; }
         <span></span><span></span><span></span>
       </button>
       <div class="topbar-left">
-        <h2 id="page-title">📊 대시보드</h2>
+        <h2 id="page-title">📊 품질 현황</h2>
         <div class="breadcrumb" id="page-sub">품질 관리</div>
       </div>
     </div>
@@ -1038,15 +1040,15 @@ tbody tr:hover td { background: #f8faff; }
         </div>
         <div class="kpi-card orange">
           <div class="kpi-icon">📊</div>
-          <div class="kpi-label">고객사 불량 PPM<br><span style="font-size:10px;font-weight:400;color:var(--text-muted);">Customer PPM</span></div>
+          <div class="kpi-label">GQMS 등록 건수<br><span style="font-size:10px;font-weight:400;color:var(--text-muted);">GQMS Registered</span></div>
           <div class="kpi-value" id="kpi-thismonth">-</div>
-          <div class="kpi-sub" id="kpi-thismonth-sub">생산수량 기준</div>
+          <div class="kpi-sub" id="kpi-thismonth-sub">비고 GQMS 기재 건</div>
         </div>
         <div class="kpi-card red">
           <div class="kpi-icon">⚙️</div>
-          <div class="kpi-label">사내 불량 PPM<br><span style="font-size:10px;font-weight:400;color:var(--text-muted);">In-house PPM</span></div>
+          <div class="kpi-label">GQMS PPM<br><span style="font-size:10px;font-weight:400;color:var(--text-muted);">GQMS PPM</span></div>
           <div class="kpi-value" id="kpi-open">-</div>
-          <div class="kpi-sub" id="kpi-open-sub">수입검사~PDI 기준</div>
+          <div class="kpi-sub" id="kpi-open-sub">생산수량 기준</div>
         </div>
       </div>
 
@@ -1133,7 +1135,7 @@ tbody tr:hover td { background: #f8faff; }
     </div><!-- /page-home -->
 
     <!-- ════ 불량 관리 ════ -->
-    <div id="page-defects" class="page">
+    <div id="page-defects" class="page" style="position:relative;">
       <div class="filter-row">
         <div class="search-wrap">
           <span class="search-icon-pos">🔍</span>
@@ -1154,11 +1156,11 @@ tbody tr:hover td { background: #f8faff; }
         </div>
       </div>
       <div class="card" style="padding:0;overflow:hidden;">
-        <div class="table-wrap">
-          <table>
+        <div class="table-wrap" id="table-wrap-main">
+          <table id="defect-table">
             <thead>
               <tr>
-                <th style="width:40px;"></th>
+                <th style="width:52px;"></th>
                 <th>차종<br><span style="font-size:10px;font-weight:400;opacity:.7;">Model</span></th>
                 <th>품번<br><span style="font-size:10px;font-weight:400;opacity:.7;">Part No.</span></th>
                 <th>ASSY품목명<br><span style="font-size:10px;font-weight:400;opacity:.7;">Part Name</span></th>
@@ -1166,7 +1168,7 @@ tbody tr:hover td { background: #f8faff; }
                 <th>발생처<br><span style="font-size:10px;font-weight:400;opacity:.7;">Occurrence</span></th>
                 <th>귀책처<br><span style="font-size:10px;font-weight:400;opacity:.7;">Responsibility</span></th>
                 <th>등록일<br><span style="font-size:10px;font-weight:400;opacity:.7;">Date</span></th>
-                <th style="width:52px;text-align:center;">사진<br><span style="font-size:10px;font-weight:400;opacity:.7;">Photo</span></th>
+                <th style="width:60px;text-align:center;">사진<br><span style="font-size:10px;font-weight:400;opacity:.7;">Photo</span></th>
                 <th>불량 내용<br><span style="font-size:10px;font-weight:400;opacity:.7;">Description</span></th>
                 <th>수량<br><span style="font-size:10px;font-weight:400;opacity:.7;">Qty</span></th>
                 <th>대책<br><span style="font-size:10px;font-weight:400;opacity:.7;">Countermeasure</span></th>
@@ -1394,6 +1396,10 @@ tbody tr:hover td { background: #f8faff; }
             <option value="기타">기타</option>
           </select>
         </div>
+        <div class="form-group">
+          <label class="form-label">등록일 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Date</span></label>
+          <input class="form-input" id="f-date" type="date">
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">불량 내용 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Description</span></label>
@@ -1526,6 +1532,10 @@ tbody tr:hover td { background: #f8faff; }
             <option value="기타">기타</option>
           </select>
         </div>
+        <div class="form-group">
+          <label class="form-label">등록일 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Date</span></label>
+          <input class="form-input" id="e-date" type="date">
+        </div>
       </div>
       <div class="form-row">
       <div class="form-group">
@@ -1620,7 +1630,14 @@ async function sheetLoad() {
           // _row 기준으로 해당 행의 사진만 유지 (같은 품번 다른 행 사진 섞임 방지)
           photos = existingPhotoMap[d._row];
         }
-        return { ...d, photos, counter: d.counter||'' };
+        return {
+          ...d,
+          photos,
+          counter: String(d.counter ?? '').trim(),
+          remark:  String(d.remark  ?? '').trim(),
+          desc:    String(d.desc    ?? '').trim(),
+          qty:     String(d.qty     ?? '').trim(),
+        };
       });
     }
     if (prodJson.ok && prodJson.data) {
@@ -1729,7 +1746,7 @@ let uploadedPhotos=[];
 
 // ══ NAVIGATION ══
 const pageInfo = {
-  home:    { title:'📊 대시보드',        sub:(() => { const n=new Date(); return `품질 관리 · ${n.getFullYear()}년 ${n.getMonth()+1}월`; })() },
+  home:    { title:'📊 품질 현황',        sub:(() => { const n=new Date(); return `품질 관리 · ${n.getFullYear()}년 ${n.getMonth()+1}월`; })() },
   defects: { title:'🔴 불량 관리',       sub:'등록 및 추적 · Defect Management' },
   report:  { title:'📄 월간 보고서',     sub:(() => { const n=new Date(); return `${n.getFullYear()}년 ${n.getMonth()+1}월 품질 실적`; })() },
 };
@@ -1766,30 +1783,26 @@ function renderDashboard() {
 
   // 고객사 불량 (HMI 1 + HMI 2)
   const customerDefects = monthData.filter(d => d.occurrence === 'HMI 1' || d.occurrence === 'HMI 2');
-  // 사내 불량 (수입검사+프레스라인+조립라인+PDI)
-  const internalOcc = ['수입검사','프레스라인','조립라인','PDI'];
-  const internalDefects = monthData.filter(d => internalOcc.includes(d.occurrence));
+
+  // GQMS 등록 건수 — 비고(remark)에 'GQMS' 포함된 건
+  const gqmsDefects = monthData.filter(d => (d.remark||'').toUpperCase().includes('GQMS'));
+  const gqmsQty     = gqmsDefects.reduce((s,d)=>s+Number(d.qty||0),0);
 
   // 생산수량
   const prodQty = productionData[thisYM] || 0;
 
-  // PPM 계산 (불량수량 합계 기준)
-  const customerQty  = customerDefects.reduce((s,d)=>s+Number(d.qty||0),0);
-  const internalQty  = internalDefects.reduce((s,d)=>s+Number(d.qty||0),0);
-  const customerPPM  = prodQty > 0 ? Math.round(customerQty / prodQty * 1000000) : null;
-  const internalPPM  = prodQty > 0 ? Math.round(internalQty / prodQty * 1000000) : null;
-
-  const ppmStr  = (val) => val === null ? '생산수량 미입력' : val.toLocaleString();
+  // GQMS PPM = GQMS 불량수량 합계 ÷ 생산수량 × 1,000,000
+  const gqmsPPM = prodQty > 0 ? Math.round(gqmsQty / prodQty * 1000000) : null;
 
   // KPI 렌더링
   document.getElementById('kpi-total').textContent        = monthData.length + '건';
   document.getElementById('kpi-total-sub').textContent    = `${label} · MoM ${diff>0?'▲+'+diff:diff<0?'▼'+diff:'─'} 건`;
   document.getElementById('kpi-closed-rate').textContent  = customerDefects.length + '건';
   document.getElementById('kpi-closed-sub').textContent   = `HMI 1: ${monthData.filter(d=>d.occurrence==='HMI 1').length}건 · HMI 2: ${monthData.filter(d=>d.occurrence==='HMI 2').length}건`;
-  document.getElementById('kpi-thismonth').textContent    = customerPPM === null ? '-' : customerPPM.toLocaleString();
-  document.getElementById('kpi-thismonth-sub').textContent = prodQty > 0 ? `생산 ${prodQty.toLocaleString()}개 기준 (Prod. Vol.)` : '생산수량 미입력 (No Prod. Data)';
-  document.getElementById('kpi-open').textContent         = internalPPM === null ? '-' : internalPPM.toLocaleString();
-  document.getElementById('kpi-open-sub').textContent     = prodQty > 0 ? `사내 불량 ${internalQty}개 기준 (In-house)` : '생산수량 미입력 (No Prod. Data)';
+  document.getElementById('kpi-thismonth').textContent    = gqmsDefects.length + '건';
+  document.getElementById('kpi-thismonth-sub').textContent = `비고 GQMS 기재 ${gqmsDefects.length}건 / 불량수량 ${gqmsQty}개`;
+  document.getElementById('kpi-open').textContent         = gqmsPPM === null ? '-' : gqmsPPM.toLocaleString();
+  document.getElementById('kpi-open-sub').textContent     = prodQty > 0 ? `GQMS 불량수량 ${gqmsQty}개 ÷ 생산 ${prodQty.toLocaleString()}개` : '생산수량 미입력 (No Prod. Data)';
 
   // 생산수량 입력 UI (대시보드 상단)
   const prodWrap = document.getElementById('prod-qty-wrap');
@@ -2332,7 +2345,7 @@ function renderTable() {
     const idx = defects.indexOf(d);
     return `
     <tr class="defect-row">
-      <td><button class="btn btn-sm edit-btn" data-idx="${idx}" style="background:var(--accent-light);color:var(--accent);border:1px solid #c7d7ff;padding:4px 7px;">✏️</button></td>
+      <td><button class="btn btn-sm edit-btn" data-idx="${idx}" onclick="event.stopPropagation();openEditModal(${idx})" style="background:var(--accent-light);color:var(--accent);border:1px solid #c7d7ff;padding:4px 7px;">✏️</button></td>
       <td style="font-weight:600;">${d.carModel||'-'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);">${d.partNo||'-'}</td>
       <td style="font-weight:600;">${d.item}</td>
@@ -2446,6 +2459,8 @@ function closeDetail(){ document.getElementById('modal-detail').classList.remove
 // ══ 불량 등록 ══
 function openModal(){
   ['f-carmodel','f-partno','f-item','f-owner','f-desc','f-qty','f-counter','f-remark'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  const fd = document.getElementById('f-date');
+  if (fd) fd.value = new Date().toISOString().slice(0,10);
   uploadedPhotos=[]; renderPhotoGrid();
   document.getElementById('f-photos').value='';
   document.getElementById('modal-reg').classList.add('open');
@@ -2477,7 +2492,7 @@ async function submitDefect(){
     type:       document.getElementById('f-type').value,
     occurrence: document.getElementById('f-sev').value,
     qty:        document.getElementById('f-qty').value||'-',
-    date:       new Date().toISOString().slice(0,10),
+    date:       document.getElementById('f-date')?.value || new Date().toISOString().slice(0,10),
     owner:      document.getElementById('f-owner').value||'미지정',
     status:     'open',
     desc:       document.getElementById('f-desc').value||'-',
@@ -2509,7 +2524,6 @@ function openEditModal(idx){
   document.getElementById('e-remark').value   = d.remark||'';
   document.getElementById('e-date').value     = (d.date||'').slice(0,10);
   setSelectVal('e-type',d.type); setSelectVal('e-sev',d.occurrence);
-  setSelectVal('e-status',d.status);
   // 기존 사진 초기화 후 해당 불량 사진만 로드
   uploadedPhotos = [];
   uploadedPhotos = Array.isArray(d.photos) ? d.photos.map(p => typeof p === 'string' ? {url:p,thumb:p} : p) : [];
@@ -2521,6 +2535,7 @@ function openEditModal(idx){
 }
 function setSelectVal(id,val){
   const sel=document.getElementById(id);
+  if(!sel) return;
   for(let opt of sel.options){ if(opt.value===val||opt.text===val){sel.value=opt.value;break;} }
 }
 function closeEditModal(){
@@ -2913,6 +2928,10 @@ updateSheetBtn();
 updatePollBtn();
 updateFilterMonthLabel();
 if (GAS_URL) sheetLoad();
+
+
+
+
 </script>
 </body>
 </html>

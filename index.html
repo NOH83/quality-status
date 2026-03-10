@@ -946,7 +946,6 @@ tbody tr:hover td { background: #f8faff; }
   <div class="mobile-tab" id="mob-tab-defects" onclick="goPage('defects',null);setMobTab('defects')">
     <span class="mobile-tab-icon">🔴</span>
     <span>불량 관리</span>
-    <span class="mobile-tab-badge" id="mob-open-badge"></span>
   </div>
   <div class="mobile-tab" id="mob-tab-report" onclick="goPage('report',null);setMobTab('report')">
     <span class="mobile-tab-icon">📄</span>
@@ -969,7 +968,6 @@ tbody tr:hover td { background: #f8faff; }
   </div>
   <div class="nav-item" onclick="goPage('defects',this)">
     <span class="nav-icon">🔴</span> 불량 관리<br><span style="font-size:11px;font-weight:400;opacity:.6;padding-left:22px;">Defect Mgmt</span>
-    <span class="nav-badge" id="open-badge">7</span>
   </div>
   <div class="nav-item" onclick="goPage('report',this)">
     <span class="nav-icon">📄</span> 월간 보고서<br><span style="font-size:11px;font-weight:400;opacity:.6;padding-left:22px;">Monthly Report</span>
@@ -1171,6 +1169,7 @@ tbody tr:hover td { background: #f8faff; }
                 <th style="width:52px;text-align:center;">사진<br><span style="font-size:10px;font-weight:400;opacity:.7;">Photo</span></th>
                 <th>불량 내용<br><span style="font-size:10px;font-weight:400;opacity:.7;">Description</span></th>
                 <th>수량<br><span style="font-size:10px;font-weight:400;opacity:.7;">Qty</span></th>
+                <th>대책<br><span style="font-size:10px;font-weight:400;opacity:.7;">Countermeasure</span></th>
                 <th>비고<br><span style="font-size:10px;font-weight:400;opacity:.7;">Remark</span></th>
               </tr>
             </thead>
@@ -1199,16 +1198,16 @@ tbody tr:hover td { background: #f8faff; }
           <div class="kpi-sub" id="r-total-sub"></div>
         </div>
         <div class="kpi-card green">
-          <div class="kpi-icon">✅</div>
-          <div class="kpi-label">완료 처리율<br><span style="font-size:10px;font-weight:400;color:var(--text-muted);">Completion Rate</span></div>
+          <div class="kpi-icon">🏭</div>
+          <div class="kpi-label">고객사 불량 건수<br><span style="font-size:10px;font-weight:400;color:var(--text-muted);">Customer Defects</span></div>
           <div class="kpi-value" id="r-closed-rate">-</div>
-          <div class="kpi-sub" id="r-closed-sub"></div>
+          <div class="kpi-sub" id="r-closed-sub">HMI 1 + HMI 2</div>
         </div>
         <div class="kpi-card orange">
-          <div class="kpi-icon">⚠️</div>
-          <div class="kpi-label">미처리 건수<br><span style="font-size:10px;font-weight:400;color:var(--text-muted);">Open Issues</span></div>
+          <div class="kpi-icon">📊</div>
+          <div class="kpi-label">고객사 불량 PPM<br><span style="font-size:10px;font-weight:400;color:var(--text-muted);">Customer PPM</span></div>
           <div class="kpi-value" id="r-open">-</div>
-          <div class="kpi-sub" id="r-open-sub"></div>
+          <div class="kpi-sub" id="r-open-sub">생산수량 기준</div>
         </div>
         <div class="kpi-card red">
           <div class="kpi-icon">📈</div>
@@ -1286,7 +1285,6 @@ tbody tr:hover td { background: #f8faff; }
   <th>수량<br><span style="font-size:10px;font-weight:400;opacity:.7;">Qty</span></th>
   <th>귀책처<br><span style="font-size:10px;font-weight:400;opacity:.7;">Resp.</span></th>
   <th>등록일<br><span style="font-size:10px;font-weight:400;opacity:.7;">Date</span></th>
-  <th>상태<br><span style="font-size:10px;font-weight:400;opacity:.7;">Status</span></th>
 </tr>
             </thead>
             <tbody id="r-tbody"></tbody>
@@ -1402,6 +1400,10 @@ tbody tr:hover td { background: #f8faff; }
         <textarea class="form-textarea" id="f-desc" placeholder="불량 현상, 위치, 발생 상황 등 상세 내용을 입력하세요."></textarea>
       </div>
       <div class="form-group">
+        <label class="form-label">대책 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Countermeasure</span></label>
+        <textarea class="form-textarea" id="f-counter" placeholder="원인 분석 및 재발 방지 대책을 입력하세요."></textarea>
+      </div>
+      <div class="form-group">
         <label class="form-label">비고 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Remark</span></label>
         <input class="form-input" id="f-remark" placeholder="기타 특이사항 입력">
       </div>
@@ -1433,7 +1435,6 @@ tbody tr:hover td { background: #f8faff; }
     <div class="modal-body" id="detail-body"></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeDetail()">닫기</button>
-      <button class="btn btn-primary" id="detail-action-btn"></button>
     </div>
   </div>
 </div>
@@ -1527,21 +1528,13 @@ tbody tr:hover td { background: #f8faff; }
         </div>
       </div>
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">상태 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Status</span></label>
-          <select class="form-select" id="e-status">
-            <option value="open">미처리 (Open)</option>
-            <option value="closed">완료 (Done)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">등록일 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Date</span></label>
-          <input class="form-input" id="e-date" type="date">
-        </div>
-      </div>
       <div class="form-group">
         <label class="form-label">불량 내용 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Description</span></label>
         <textarea class="form-textarea" id="e-desc" placeholder="불량 현상, 위치, 발생 상황 등 상세 내용을 입력하세요."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">대책 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Countermeasure</span></label>
+        <textarea class="form-textarea" id="e-counter" placeholder="원인 분석 및 재발 방지 대책을 입력하세요."></textarea>
       </div>
       <div class="form-group">
         <label class="form-label">비고 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Remark</span></label>
@@ -1627,7 +1620,7 @@ async function sheetLoad() {
           // _row 기준으로 해당 행의 사진만 유지 (같은 품번 다른 행 사진 섞임 방지)
           photos = existingPhotoMap[d._row];
         }
-        return { ...d, photos };
+        return { ...d, photos, counter: d.counter||'' };
       });
     }
     if (prodJson.ok && prodJson.data) {
@@ -2080,9 +2073,8 @@ function renderReport() {
 
   const curr   = defects.filter(d => (d.date||'').startsWith(ym));
   const prev   = defects.filter(d => (d.date||'').startsWith(prevYM));
-  const closed = curr.filter(d => d.status === 'closed');
-  const open   = curr.filter(d => d.status === 'open');
-  const rate   = curr.length ? Math.round(closed.length / curr.length * 100) : 0;
+  // 고객사 불량 (HMI 1 + HMI 2)
+  const customerDef = curr.filter(d => d.occurrence === 'HMI 1' || d.occurrence === 'HMI 2');
   const diff   = curr.length - prev.length;
 
   document.getElementById('report-month-label').textContent = label;
@@ -2090,10 +2082,12 @@ function renderReport() {
   // KPI
   document.getElementById('r-total').textContent      = curr.length + '건';
   document.getElementById('r-total-sub').textContent  = `전체 누계 ${defects.length}건 중 (Total)`;
-  document.getElementById('r-closed-rate').textContent = rate + '%';
-  document.getElementById('r-closed-sub').textContent  = `완료(Done) ${closed.length}건 / 당월 ${curr.length}건`;
-  document.getElementById('r-open').textContent       = open.length + '건';
-  document.getElementById('r-open-sub').textContent   = open.length > 0 ? '즉시 조치 필요 (Action Required)' : '✅ 모두 처리 완료 (All Done)';
+  const rProdQty = productionData[reportYM] || 0;
+  const rCustPPM = rProdQty > 0 ? Math.round(customerDef.reduce((s,d)=>s+Number(d.qty||1),0) / rProdQty * 1000000) : null;
+  document.getElementById('r-closed-rate').textContent = customerDef.length + '건';
+  document.getElementById('r-closed-sub').textContent  = `HMI 1: ${curr.filter(d=>d.occurrence==='HMI 1').length}건 · HMI 2: ${curr.filter(d=>d.occurrence==='HMI 2').length}건`;
+  document.getElementById('r-open').textContent        = rCustPPM === null ? '-' : rCustPPM.toLocaleString();
+  document.getElementById('r-open-sub').textContent    = rProdQty > 0 ? `고객사 불량 ${customerDef.reduce((s,d)=>s+Number(d.qty||1),0)}개 기준` : '생산수량 미입력';
   const diffEl = document.getElementById('r-diff');
   diffEl.textContent = (diff > 0 ? '▲ +' : diff < 0 ? '▼ ' : '─ ') + diff + '건';
   diffEl.style.color = diff > 0 ? 'var(--danger)' : diff < 0 ? 'var(--success)' : 'var(--text-muted)';
@@ -2261,9 +2255,8 @@ function renderReport() {
           <td style="font-family:'DM Mono',monospace;">${d.qty||'-'}</td>
           <td>${biLang(d.owner)||'-'}</td>
           <td style="font-family:'DM Mono',monospace;font-size:11px;">${(d.date||'').slice(0,10)}</td>
-          <td><span class="badge ${d.status}">${statusKo[d.status]||d.status}</span></td>
         </tr>`).join('')
-    : '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:20px;">당월 불량 데이터가 없습니다. (No Defects)</td></tr>';
+    : '<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:20px;">당월 불량 데이터가 없습니다. (No Defects)</td></tr>';
 
   // 종합 의견
   const topType  = groupBy(curr,'type')[0]?.[0]  || '-';
@@ -2291,7 +2284,6 @@ function renderHomeDefects() {
   if (!el) return;
   el.innerHTML = defects.slice(0,4).map(d=>`
     <div onclick="openDetail('${d.partNo}')" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;">
-      <span class="badge ${d.status}" style="flex-shrink:0;">${d.status==='open'?'미처리 Open':'완료 Done'}</span>
       <div style="flex:1;min-width:0;">
         <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.item} <span style="font-weight:400;color:var(--text-muted);">(${d.carModel||'-'})</span></div>
         <div style="font-size:11px;color:var(--text-muted);">${d.type} · ${d.occurrence}</div>
@@ -2333,7 +2325,7 @@ function updateFilterMonthLabel() {
 
 function renderTable() {
   const list=getFiltered(), tbody=document.getElementById('defect-tbody');
-  if(!list.length){ tbody.innerHTML=`<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">🔍</div><p>해당하는 불량이 없습니다.</p></div></td></tr>`; return; }
+  if(!list.length){ tbody.innerHTML=`<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">🔍</div><p>해당하는 불량이 없습니다.</p></div></td></tr>`; return; }
 
   tbody.innerHTML=list.map((d)=>{
     // defects 배열의 실제 인덱스를 data-idx로 저장 → 같은 품번 여러 행 정확히 구분
@@ -2355,6 +2347,7 @@ function renderTable() {
       </td>
       <td style="font-size:12px;color:var(--text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.desc||'-'}</td>
       <td style="font-family:'DM Mono',monospace;text-align:center;">${d.qty||'-'}</td>
+      <td style="font-size:12px;color:var(--text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.counter||'-'}</td>
       <td style="font-size:12px;color:var(--text-muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.remark||'-'}</td>
     </tr>`;
   }).join('');
@@ -2388,12 +2381,7 @@ async function toggleStatus(partNo){
   await sheetUpdate(d);
 }
 
-function updateBadge(){
-  const cnt = defects.filter(d=>d.status==='open').length;
-  document.getElementById('open-badge').textContent = cnt;
-  const mobBadge = document.getElementById('mob-open-badge');
-  if (mobBadge) mobBadge.textContent = cnt > 0 ? cnt : '';
-}
+function updateBadge(){}
 
 // ── 모바일 사이드바 토글
 function saveProdQtyFromInput() {
@@ -2427,19 +2415,16 @@ function setMobTab(name) {
 function openDetail(partNo){
   const d=defects.find(x=>x.partNo===partNo); if(!d) return;
   document.getElementById('detail-body').innerHTML=`
-    <div style="display:flex;gap:8px;margin-bottom:16px;">
-      <span class="badge ${d.status}" style="font-size:12px;">${d.status==='open'?'미처리 Open':'완료 Done'}</span>
-    </div>
     <div class="detail-row"><div class="detail-key">차종<br><span style="font-size:10px;opacity:.6;">Model</span></div><div class="detail-val">${d.carModel||'-'}</div></div>
     <div class="detail-row"><div class="detail-key">품번<br><span style="font-size:10px;opacity:.6;">Part No.</span></div><div class="detail-val" style="font-family:'DM Mono',monospace;">${d.partNo||'-'}</div></div>
     <div class="detail-row"><div class="detail-key">품목명<br><span style="font-size:10px;opacity:.6;">Part Name</span></div><div class="detail-val">${d.item}</div></div>
-    <div class="detail-row"><div class="detail-key">시리얼<br><span style="font-size:10px;opacity:.6;">Serial</span></div><div class="detail-val" style="font-family:'DM Mono',monospace;">${d.serial||'-'}</div></div>
     <div class="detail-row"><div class="detail-key">불량 유형<br><span style="font-size:10px;opacity:.6;">Defect Type</span></div><div class="detail-val">${d.type}${KO_EN[d.type]?'<br><span style="font-size:11px;color:var(--text-muted);">'+KO_EN[d.type]+'</span>':''}</div></div>
     <div class="detail-row"><div class="detail-key">발생처<br><span style="font-size:10px;opacity:.6;">Occurrence</span></div><div class="detail-val">${d.occurrence||'-'}${KO_EN[d.occurrence]?'<br><span style="font-size:11px;color:var(--text-muted);">'+KO_EN[d.occurrence]+'</span>':''}</div></div>
     <div class="detail-row"><div class="detail-key">불량 수량<br><span style="font-size:10px;opacity:.6;">Qty</span></div><div class="detail-val">${d.qty||'-'} ea</div></div>
     <div class="detail-row"><div class="detail-key">귀책처<br><span style="font-size:10px;opacity:.6;">Responsibility</span></div><div class="detail-val">${d.owner}${KO_EN[d.owner]?'<br><span style="font-size:11px;color:var(--text-muted);">'+KO_EN[d.owner]+'</span>':''}</div></div>
     <div class="detail-row"><div class="detail-key">등록일<br><span style="font-size:10px;opacity:.6;">Date</span></div><div class="detail-val">${(d.date||"").slice(0,10)}</div></div>
     <div class="detail-row"><div class="detail-key">불량 내용<br><span style="font-size:10px;opacity:.6;">Description</span></div><div class="detail-val" style="line-height:1.7;">${d.desc}</div></div>
+    ${d.counter?`<div class="detail-row"><div class="detail-key">대책<br><span style="font-size:10px;opacity:.6;">Countermeasure</span></div><div class="detail-val" style="line-height:1.7;">${d.counter}</div></div>`:''}
     ${d.remark?`<div class="detail-row"><div class="detail-key">비고<br><span style="font-size:10px;opacity:.6;">Remark</span></div><div class="detail-val">${d.remark}</div></div>`:''}
     ${Array.isArray(d.photos)&&d.photos.length?`
     <div style="margin-top:14px;">
@@ -2460,7 +2445,7 @@ function closeDetail(){ document.getElementById('modal-detail').classList.remove
 
 // ══ 불량 등록 ══
 function openModal(){
-  ['f-carmodel','f-partno','f-item','f-owner','f-desc','f-qty','f-remark'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['f-carmodel','f-partno','f-item','f-owner','f-desc','f-qty','f-counter','f-remark'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   uploadedPhotos=[]; renderPhotoGrid();
   document.getElementById('f-photos').value='';
   document.getElementById('modal-reg').classList.add('open');
@@ -2496,6 +2481,7 @@ async function submitDefect(){
     owner:      document.getElementById('f-owner').value||'미지정',
     status:     'open',
     desc:       document.getElementById('f-desc').value||'-',
+    counter:    document.getElementById('f-counter').value||'',
     remark:     document.getElementById('f-remark').value||'',
     photos:     [...uploadedPhotos],
   };
@@ -2519,6 +2505,7 @@ function openEditModal(idx){
   document.getElementById('e-qty').value      = d.qty||'';
   document.getElementById('e-owner').value    = d.owner||'';
   document.getElementById('e-desc').value     = d.desc||'';
+  document.getElementById('e-counter').value  = d.counter||'';
   document.getElementById('e-remark').value   = d.remark||'';
   document.getElementById('e-date').value     = (d.date||'').slice(0,10);
   setSelectVal('e-type',d.type); setSelectVal('e-sev',d.occurrence);
@@ -2553,8 +2540,8 @@ async function saveEdit(){
   d.item=item; d.serial='-';
   d.type=document.getElementById('e-type').value; d.occurrence=document.getElementById('e-sev').value;
   d.qty=document.getElementById('e-qty').value||'-';
-  d.owner=document.getElementById('e-owner').value||'미지정'; d.status=document.getElementById('e-status').value;
-  d.date=document.getElementById('e-date').value; d.desc=document.getElementById('e-desc').value||'-'; d.remark=document.getElementById('e-remark').value||'';
+  d.owner=document.getElementById('e-owner').value||'미지정';
+  d.date=document.getElementById('e-date').value; d.desc=document.getElementById('e-desc').value||'-'; d.counter=document.getElementById('e-counter').value||''; d.remark=document.getElementById('e-remark').value||'';
   d.photos=[...uploadedPhotos];
   closeEditModal(); renderTable(); renderHomeDefects(); updateBadge(); renderDashboard();
   await sheetUpdate(d);
@@ -2574,16 +2561,15 @@ async function deleteDefect(){
 // ══ 엑셀 다운로드 ══
 function downloadExcel(){
   const list=getFiltered();
-  const headers=['차종','품번','품목명','시리얼','불량유형','발생처','불량수량','귀책처','등록일','상태','불량내용'];
-  const statusKo={open:'미처리',closed:'완료'};
-  const rows=[headers,...list.map(d=>[d.carModel||'-',d.partNo||'-',d.item,d.serial||'-',d.type,d.occurrence||'-',d.qty||'-',d.owner,d.date,statusKo[d.status]||d.status,d.desc])];
+  const headers=['차종','품번','품목명','불량유형','발생처','불량수량','귀책처','등록일','불량내용','대책','비고'];
+  const rows=[headers,...list.map(d=>[d.carModel||'-',d.partNo||'-',d.item,d.type,d.occurrence||'-',d.qty||'-',d.owner,d.date,d.desc,d.counter||'',d.remark||''])];
   const csv='\uFEFF'+rows.map(r=>r.map(c=>{const s=String(c??'');return s.includes(',')||s.includes('\n')||s.includes('"')?`"${s.replace(/"/g,'""')}"`  :s;}).join(',')).join('\r\n');
   const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'})),download:`불량현황_${new Date().toISOString().slice(0,10)}.csv`});
   a.click(); URL.revokeObjectURL(a.href);
 }
 
 // ══ CSV 업로드 ══
-const COL_MAP={'차종':'carModel','품번':'partNo','품목명':'item','시리얼':'serial','불량유형':'type','발생처':'occurrence','불량수량':'qty','귀책처':'owner','등록일':'date','상태':'status','불량내용':'desc'};
+const COL_MAP={'차종':'carModel','품번':'partNo','품목명':'item','불량유형':'type','발생처':'occurrence','불량수량':'qty','귀책처':'owner','등록일':'date','불량내용':'desc'};
 
 function handleExcelUpload(input){
   const file=input.files[0]; if(!file) return; input.value='';
@@ -2621,8 +2607,7 @@ async function parseAndImport(csvText,filename){
       const row={status:'open',photos:[]};
       Object.entries(keyMap).forEach(([ci,field])=>{ row[field]=(cells[ci]||'').trim()||'-'; });
       if(!row.partNo||row.partNo==='-') row.partNo=`PN-IMP-${String(i).padStart(3,'0')}`;
-      if(row.status) row.status=(row.status.includes('미처리')||row.status==='open')?'open':'closed';
-      newRows.push(row);
+newRows.push(row);
     }
     if(!newRows.length){ showToast('error','데이터 없음','유효한 데이터가 없습니다.'); return; }
     let updated=0,added=0;

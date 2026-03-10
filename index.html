@@ -896,32 +896,32 @@ tbody tr:hover td { background: #f8faff; }
 <div class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-tag">QMS v1.0</div>
-    <div class="logo-title">품질 현황<br>관리 시스템</div>
+    <div class="logo-title">품질 현황<br>관리 시스템<br><span style="font-size:10px;font-weight:400;opacity:.6;letter-spacing:0.5px;">Quality Management</span></div>
   </div>
-  <div class="sidebar-section-label">메뉴</div>
+  <div class="sidebar-section-label">메뉴 · Menu</div>
   <div class="nav-item active" onclick="goPage('home',this)">
-    <span class="nav-icon">📊</span> 대시보드
+    <span class="nav-icon">📊</span> 대시보드<br><span style="font-size:10px;font-weight:400;opacity:.6;padding-left:26px;">Dashboard</span>
   </div>
   <div class="nav-item" onclick="goPage('defects',this)">
-    <span class="nav-icon">🔴</span> 불량 관리
+    <span class="nav-icon">🔴</span> 불량 관리<br><span style="font-size:10px;font-weight:400;opacity:.6;padding-left:26px;">Defect Mgmt</span>
     <span class="nav-badge" id="open-badge">7</span>
   </div>
   <div class="nav-item" onclick="goPage('report',this)">
-    <span class="nav-icon">📄</span> 월간 보고서
+    <span class="nav-icon">📄</span> 월간 보고서<br><span style="font-size:10px;font-weight:400;opacity:.6;padding-left:26px;">Monthly Report</span>
   </div>
   <div style="padding: 10px 12px 6px;">
     <button id="sheet-btn" onclick="openGasSetup()" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 12px;color:var(--sidebar-text);font-size:12px;font-family:'Noto Sans KR',sans-serif;font-weight:600;cursor:pointer;text-align:left;transition:background 0.15s;">
-      🔗 Sheets 연동 설정
+      🔗 Sheets 연동 설정<br><span style="font-size:10px;font-weight:400;opacity:.6;">Connection Setup</span>
     </button>
   </div>
   <div style="padding: 4px 12px 6px; display:flex; gap:6px;">
     <button onclick="sheetLoad()" title="Sheets에서 최신 데이터 불러오기"
       style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 8px;color:var(--sidebar-text);font-size:12px;font-family:'Noto Sans KR',sans-serif;font-weight:600;cursor:pointer;transition:all 0.15s;">
-      🔄 새로고침
+      🔄 새로고침<br><span style="font-size:10px;font-weight:400;opacity:.6;">Refresh</span>
     </button>
     <button id="poll-btn" onclick="togglePolling()" title="60초마다 자동으로 Sheets 확인"
       style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 8px;color:var(--sidebar-text);font-size:12px;font-family:'Noto Sans KR',sans-serif;font-weight:600;cursor:pointer;transition:all 0.15s;">
-      ⏱ 자동동기화
+      ⏱ 자동동기화<br><span style="font-size:10px;font-weight:400;opacity:.6;">Auto Sync</span>
     </button>
   </div>
   </div>
@@ -993,7 +993,7 @@ tbody tr:hover td { background: #f8faff; }
           <div class="card-header">
             <div>
               <div class="card-title">불량 유형별 현황<br><span style="font-size:11px;font-weight:400;color:var(--text-muted);">Defect Type</span></div>
-              <div class="card-sub">전체 누계</div>
+              <div class="card-sub">전체 누계 (Total)</div>
             </div>
           </div>
           <div class="bar-list" id="chart-type"></div>
@@ -1004,7 +1004,7 @@ tbody tr:hover td { background: #f8faff; }
           <div class="card-header">
             <div>
               <div class="card-title">모델별 현황<br><span style="font-size:11px;font-weight:400;color:var(--text-muted);">By Model</span></div>
-              <div class="card-sub">전체 누계</div>
+              <div class="card-sub">전체 누계 (Total)</div>
             </div>
           </div>
           <div class="bar-list" id="chart-model"></div>
@@ -1015,7 +1015,7 @@ tbody tr:hover td { background: #f8faff; }
           <div class="card-header">
             <div>
               <div class="card-title">발생처별 현황<br><span style="font-size:11px;font-weight:400;color:var(--text-muted);">By Occurrence</span></div>
-              <div class="card-sub">전체 누계</div>
+              <div class="card-sub">전체 누계 (Total)</div>
             </div>
           </div>
           <div class="bar-list" id="chart-occurrence"></div>
@@ -1026,7 +1026,7 @@ tbody tr:hover td { background: #f8faff; }
           <div class="card-header">
             <div>
               <div class="card-title">귀책처별 현황<br><span style="font-size:11px;font-weight:400;color:var(--text-muted);">By Responsibility</span></div>
-              <div class="card-sub">전체 누계</div>
+              <div class="card-sub">전체 누계 (Total)</div>
             </div>
           </div>
           <div class="bar-list" id="chart-owner"></div>
@@ -1037,7 +1037,7 @@ tbody tr:hover td { background: #f8faff; }
           <div class="card-header">
             <div>
               <div class="card-title">품목명별 현황<br><span style="font-size:11px;font-weight:400;color:var(--text-muted);">By Part Name</span></div>
-              <div class="card-sub">전체 누계</div>
+              <div class="card-sub">전체 누계 (Total)</div>
             </div>
           </div>
           <div class="bar-list" id="chart-item"></div>
@@ -1050,7 +1050,7 @@ tbody tr:hover td { background: #f8faff; }
         <div class="card-header">
           <div>
             <div class="card-title">주별 불량 추이<br><span style="font-size:11px;font-weight:400;color:var(--text-muted);">Weekly Defect Trend</span></div>
-            <div class="card-sub" id="trend-sub">당월 주별 현황</div>
+            <div class="card-sub" id="trend-sub">당월 주별 현황 (Weekly)</div>
           </div>
         </div>
         <svg id="trend-svg" width="100%" height="130" viewBox="-15 0 950 130" preserveAspectRatio="none"></svg>
@@ -1075,6 +1075,13 @@ tbody tr:hover td { background: #f8faff; }
         <div class="search-wrap">
           <span class="search-icon-pos">🔍</span>
           <input class="search-input" placeholder="품목명, 유형, 귀책처 검색..." oninput="filterDefects(this.value)" id="search-inp">
+        </div>
+        <!-- 월 선택 -->
+        <div style="display:flex;align-items:center;gap:6px;background:var(--white);border:1px solid var(--border-dark);border-radius:8px;padding:4px 10px;">
+          <button onclick="changeFilterMonth(-1)" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text-muted);padding:0 2px;">◀</button>
+          <span id="filter-month-label" style="font-size:13px;font-weight:700;color:var(--text);min-width:80px;text-align:center;"></span>
+          <button onclick="changeFilterMonth(1)" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text-muted);padding:0 2px;">▶</button>
+          <button onclick="filterMonth='';renderTable();document.getElementById('filter-month-label').textContent='전체 All';" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--text-muted);margin-left:2px;">전체 All</button>
         </div>
         <div style="margin-left:auto;display:flex;gap:8px;">
           <input type="file" id="excel-upload-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleExcelUpload(this)">
@@ -1204,7 +1211,17 @@ tbody tr:hover td { background: #f8faff; }
         <div class="table-wrap">
           <table class="report-table">
             <thead>
-              <tr><th>차종</th><th>품번</th><th>품목명</th><th>불량유형</th><th>발생처</th><th>수량</th><th>귀책처</th><th>등록일</th><th>상태</th></tr>
+              <tr>
+  <th>차종<br><span style="font-size:10px;font-weight:400;opacity:.7;">Model</span></th>
+  <th>품번<br><span style="font-size:10px;font-weight:400;opacity:.7;">Part No.</span></th>
+  <th>품목명<br><span style="font-size:10px;font-weight:400;opacity:.7;">Part Name</span></th>
+  <th>불량유형<br><span style="font-size:10px;font-weight:400;opacity:.7;">Defect Type</span></th>
+  <th>발생처<br><span style="font-size:10px;font-weight:400;opacity:.7;">Occurrence</span></th>
+  <th>수량<br><span style="font-size:10px;font-weight:400;opacity:.7;">Qty</span></th>
+  <th>귀책처<br><span style="font-size:10px;font-weight:400;opacity:.7;">Resp.</span></th>
+  <th>등록일<br><span style="font-size:10px;font-weight:400;opacity:.7;">Date</span></th>
+  <th>상태<br><span style="font-size:10px;font-weight:400;opacity:.7;">Status</span></th>
+</tr>
             </thead>
             <tbody id="r-tbody"></tbody>
           </table>
@@ -1447,8 +1464,8 @@ tbody tr:hover td { background: #f8faff; }
         <div class="form-group">
           <label class="form-label">상태 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Status</span></label>
           <select class="form-select" id="e-status">
-            <option value="open">미처리</option>
-            <option value="closed">완료</option>
+            <option value="open">미처리 (Open)</option>
+            <option value="closed">완료 (Done)</option>
           </select>
         </div>
         <div class="form-group">
@@ -1598,13 +1615,16 @@ function updateSheetBtn() {
     btn.textContent = '🟢 Sheets 연동됨';
     btn.style.color = 'var(--success)';
   } else {
-    btn.textContent = '🔗 Sheets 연동 설정';
+    btn.textContent = '🔗 Sheets 연동 설정<br><span style="font-size:10px;font-weight:400;opacity:.6;">Connection Setup</span>';
     btn.style.color = 'var(--sidebar-text)';
   }
 }
 
 // ══ STATE ══
 let searchQ='', filterSev='', filterStatus='';
+// 불량 관리 월 필터 (기본: 당월)
+const _now = new Date();
+let filterMonth = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}`;
 
 // 생산수량 데이터 { 'YYYY-MM': qty }
 let productionData = {};
@@ -1625,7 +1645,7 @@ function goPage(name, el) {
   else { const nav = document.querySelector(`[onclick*="'${name}'"]`); if(nav) nav.classList.add('active'); }
   document.getElementById('page-title').textContent = pageInfo[name].title;
   document.getElementById('page-sub').textContent   = pageInfo[name].sub;
-  if(name==='defects') renderTable();
+  if(name==='defects') { updateFilterMonthLabel(); renderTable(); }
   if(name==='home')    renderDashboard();
   if(name==='report')  renderReport();
   setMobTab(name);
@@ -1666,13 +1686,13 @@ function renderDashboard() {
 
   // KPI 렌더링
   document.getElementById('kpi-total').textContent        = monthData.length + '건';
-  document.getElementById('kpi-total-sub').textContent    = `${label} · 전월 대비 ${diff>0?'▲+'+diff:diff<0?'▼'+diff:'─'} 건`;
+  document.getElementById('kpi-total-sub').textContent    = `${label} · MoM ${diff>0?'▲+'+diff:diff<0?'▼'+diff:'─'} 건`;
   document.getElementById('kpi-closed-rate').textContent  = customerDefects.length + '건';
   document.getElementById('kpi-closed-sub').textContent   = `HMI 1: ${monthData.filter(d=>d.occurrence==='HMI 1').length}건 · HMI 2: ${monthData.filter(d=>d.occurrence==='HMI 2').length}건`;
   document.getElementById('kpi-thismonth').textContent    = customerPPM === null ? '-' : customerPPM.toLocaleString();
-  document.getElementById('kpi-thismonth-sub').textContent = prodQty > 0 ? `생산 ${prodQty.toLocaleString()}개 기준` : '생산수량 미입력';
+  document.getElementById('kpi-thismonth-sub').textContent = prodQty > 0 ? `생산 ${prodQty.toLocaleString()}개 기준 (Prod. Vol.)` : '생산수량 미입력 (No Prod. Data)';
   document.getElementById('kpi-open').textContent         = internalPPM === null ? '-' : internalPPM.toLocaleString();
-  document.getElementById('kpi-open-sub').textContent     = prodQty > 0 ? `사내 불량 ${internalQty}개 기준` : '생산수량 미입력';
+  document.getElementById('kpi-open-sub').textContent     = prodQty > 0 ? `사내 불량 ${internalQty}개 기준 (In-house)` : '생산수량 미입력 (No Prod. Data)';
 
   // 생산수량 입력 UI (대시보드 상단)
   const prodWrap = document.getElementById('prod-qty-wrap');
@@ -1682,8 +1702,8 @@ function renderDashboard() {
         <span style="font-size:13px;color:var(--text-muted);font-weight:600;">📦 ${label} 생산수량</span>
         <input type="number" id="prod-qty-input" value="${prodQty||''}" placeholder="생산수량 입력"
           style="width:140px;padding:6px 10px;border:1px solid var(--border-dark);border-radius:8px;font-size:13px;font-family:'DM Mono',monospace;">
-        <button class="btn btn-primary btn-sm" onclick="saveProdQtyFromInput()">저장</button>
-        ${prodQty > 0 ? `<span style="font-size:12px;color:var(--success);font-weight:600;">✅ ${prodQty.toLocaleString()}개 등록됨</span>` : `<span style="font-size:12px;color:var(--danger);">⚠️ 미입력 시 PPM 계산 불가</span>`}
+        <button class="btn btn-primary btn-sm" onclick="saveProdQtyFromInput()">저장 <span style="font-size:9px;opacity:.85;">Save</span></button>
+        ${prodQty > 0 ? `<span style="font-size:12px;color:var(--success);font-weight:600;">✅ ${prodQty.toLocaleString()}개 등록됨</span>` : `<span style="font-size:12px;color:var(--danger);">⚠️ 미입력 시 PPM 계산 불가 (No Prod. Data)</span>`}
       </div>`;
   }
 
@@ -1764,6 +1784,33 @@ function renderDashboard() {
   // 주별 추이 (당월)
   renderTrendSVG(buildWeeks(now));
   renderOccurrenceTrend(now);
+}
+
+
+// ── 한글↔영문 번역 맵 ──
+const KO_EN = {
+  // 불량 유형
+  '치수 불량': 'Dimensional', '외관 불량': 'Appearance',
+  '용접 불량': 'Welding',     '기타': 'Others',
+  // 발생처
+  '수입검사': 'Incoming',   '프레스라인': 'Press Line',
+  '조립라인': 'Assembly',   'PDI': 'PDI',
+  'HMI 1': 'HMI 1',        'HMI 2': 'HMI 2',
+  // 귀책처
+  '자재': 'Material',  '품질': 'Quality',
+  '생산': 'Production','물류': 'Logistics','보전': 'Maintenance',
+  // 상태
+  'open': 'Open', 'closed': 'Done',
+};
+function biLang(val) {
+  if (!val || val === '-') return val || '-';
+  const en = KO_EN[val];
+  return en ? `${val}<br><span style="font-size:10px;color:var(--text-muted);font-weight:400;">${en}</span>` : val;
+}
+function statusBiLang(status) {
+  return status === 'open'
+    ? '미처리<br><span style="font-size:10px;font-weight:400;">Open</span>'
+    : '완료<br><span style="font-size:10px;font-weight:400;">Done</span>';
 }
 
 // ── 당월 주 목록 생성 (월요일 기준, 해당 월에 속하는 주만)
@@ -1938,15 +1985,15 @@ function renderReport() {
 
   // KPI
   document.getElementById('r-total').textContent      = curr.length + '건';
-  document.getElementById('r-total-sub').textContent  = `전체 누계 ${defects.length}건 중`;
+  document.getElementById('r-total-sub').textContent  = `전체 누계 ${defects.length}건 중 (Total)`;
   document.getElementById('r-closed-rate').textContent = rate + '%';
-  document.getElementById('r-closed-sub').textContent  = `완료 ${closed.length}건 / 당월 ${curr.length}건`;
+  document.getElementById('r-closed-sub').textContent  = `완료(Done) ${closed.length}건 / 당월 ${curr.length}건`;
   document.getElementById('r-open').textContent       = open.length + '건';
-  document.getElementById('r-open-sub').textContent   = open.length > 0 ? '즉시 조치 필요' : '✅ 모두 처리 완료';
+  document.getElementById('r-open-sub').textContent   = open.length > 0 ? '즉시 조치 필요 (Action Required)' : '✅ 모두 처리 완료 (All Done)';
   const diffEl = document.getElementById('r-diff');
   diffEl.textContent = (diff > 0 ? '▲ +' : diff < 0 ? '▼ ' : '─ ') + diff + '건';
   diffEl.style.color = diff > 0 ? 'var(--danger)' : diff < 0 ? 'var(--success)' : 'var(--text-muted)';
-  document.getElementById('r-diff-sub').textContent = `전월(${prevD.getMonth()+1}월) ${prev.length}건 대비`;
+  document.getElementById('r-diff-sub').textContent = `전월(${prevD.getMonth()+1}월) ${prev.length}건 대비 (vs Prev)`;
 
   // 색상
   const typeColors  = ['#e02424','#d97706','#7c3aed','#1a56db','#057a55','#0891b2','#9aa5b4'];
@@ -2021,7 +2068,7 @@ function renderReport() {
     const ymStr = `${reportYear}-${String(m).padStart(2,'0')}`;
     yearMonths.push({ label:`${m}월`, ym:ymStr, cnt: defects.filter(d=>(d.date||'').startsWith(ymStr)).length });
   }
-  document.getElementById('r-trend-sub').textContent = `${reportYear}년 월별 현황`;
+  document.getElementById('r-trend-sub').textContent = `${reportYear}년 월별 현황 (Monthly)`;
 
   const rSvg = document.getElementById('r-trend-svg');
   if (rSvg) {
@@ -2053,7 +2100,7 @@ function renderReport() {
   }
 
   // 발생처별 개별 추이 (해당 연도 12개월)
-  document.getElementById('r-occ-trend-sub').textContent = `${reportYear}년 발생처별 월별 현황`;
+  document.getElementById('r-occ-trend-sub').textContent = `${reportYear}년 발생처별 월별 현황 (By Occurrence)`;
   const rOccWrap = document.getElementById('r-occ-charts-wrap');
   const occSet = [...new Set(defects.map(d=>d.occurrence||'').filter(Boolean))];
   if (!occSet.length) { rOccWrap.innerHTML='<div style="color:var(--text-muted);font-size:13px;padding:16px;text-align:center;">데이터 없음</div>'; }
@@ -2098,7 +2145,7 @@ function renderReport() {
 
   // 당월 불량 목록
   document.getElementById('r-list-sub').textContent = `${ym} 등록 · ${curr.length}건`;
-  const statusKo = { open:'미처리', closed:'완료' };
+  const statusKo = { open:'미처리<br><span style="font-size:10px;font-weight:400;">Open</span>', closed:'완료<br><span style="font-size:10px;font-weight:400;">Done</span>' };
   document.getElementById('r-tbody').innerHTML = curr.length
     ? [...curr].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(d=>`
         <tr>
@@ -2121,13 +2168,13 @@ function renderReport() {
   const openRate = curr.length ? Math.round(open.length/curr.length*100) : 0;
   document.getElementById('r-summary').innerHTML = `
     <strong style="color:var(--text);">💡 ${label} 종합 의견</strong><br><br>
-    당월 총 <strong>${curr.length}건</strong>의 불량이 등록되었으며,
+    당월 총 <strong>${curr.length}건</strong>의 불량이 등록되었으며 (Monthly Total),
     완료 처리율은 <strong style="color:${rate>=80?'var(--success)':'var(--danger)'};">${rate}%</strong>입니다.
     ${diff>0?`전월 대비 <strong style="color:var(--danger);">+${diff}건 증가</strong>하였으므로 원인 분석이 필요합니다.`
     :diff<0?`전월 대비 <strong style="color:var(--success);">${diff}건 감소</strong>하여 개선 추세입니다.`
     :`전월과 동일한 수준입니다.`}
     ${curr.length>0?`<br><br>
-    📌 <strong>주요 현황:</strong><br>
+    📌 <strong>주요 현황 (Key Summary):</strong><br>
     · 최다 불량 유형: <strong>${topType}</strong><br>
     · 최다 발생 모델: <strong>${topModel}</strong><br>
     · 주요 발생처: <strong>${topOcc}</strong><br>
@@ -2140,7 +2187,7 @@ function renderHomeDefects() {
   if (!el) return;
   el.innerHTML = defects.slice(0,4).map(d=>`
     <div onclick="openDetail('${d.partNo}')" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;">
-      <span class="badge ${d.status}" style="flex-shrink:0;">${d.status==='open'?'미처리':'완료'}</span>
+      <span class="badge ${d.status}" style="flex-shrink:0;">${d.status==='open'?'미처리 Open':'완료 Done'}</span>
       <div style="flex:1;min-width:0;">
         <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.item} <span style="font-weight:400;color:var(--text-muted);">(${d.carModel||'-'})</span></div>
         <div style="font-size:11px;color:var(--text-muted);">${d.type} · ${d.occurrence}</div>
@@ -2155,8 +2202,29 @@ function getFiltered() {
     const qOk  = !searchQ      || Object.values(d).join(' ').toLowerCase().includes(searchQ.toLowerCase());
     const sOk  = !filterSev    || d.occurrence===filterSev;
     const stOk = !filterStatus || d.status===filterStatus;
-    return qOk && sOk && stOk;
+    const mOk  = !filterMonth  || (d.date||'').startsWith(filterMonth);
+    return qOk && sOk && stOk && mOk;
   });
+}
+
+function changeFilterMonth(dir) {
+  if (!filterMonth) {
+    const n = new Date();
+    filterMonth = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  }
+  const [y, m] = filterMonth.split('-').map(Number);
+  const d = new Date(y, m - 1 + dir, 1);
+  filterMonth = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  updateFilterMonthLabel();
+  renderTable();
+}
+
+function updateFilterMonthLabel() {
+  const el = document.getElementById('filter-month-label');
+  if (!el) return;
+  if (!filterMonth) { el.textContent = '전체 All'; return; }
+  const [y, m] = filterMonth.split('-').map(Number);
+  el.textContent = `${y}년 ${m}월`;
 }
 
 function renderTable() {
@@ -2168,9 +2236,9 @@ function renderTable() {
       <td style="font-weight:600;">${d.carModel||'-'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);">${d.partNo||'-'}</td>
       <td style="font-weight:600;">${d.item}</td>
-      <td>${d.type}</td>
-      <td>${d.occurrence||'-'}</td>
-      <td>${d.owner||'-'}</td>
+      <td>${biLang(d.type)}</td>
+      <td>${biLang(d.occurrence)||'-'}</td>
+      <td>${biLang(d.owner)||'-'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;">${(d.date||'').slice(0,10)}</td>
       <td style="font-size:12px;color:var(--text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.desc||'-'}</td>
       <td style="font-family:'DM Mono',monospace;text-align:center;">${d.qty||'-'}</td>
@@ -2238,22 +2306,22 @@ function openDetail(partNo){
   const d=defects.find(x=>x.partNo===partNo); if(!d) return;
   document.getElementById('detail-body').innerHTML=`
     <div style="display:flex;gap:8px;margin-bottom:16px;">
-      <span class="badge ${d.status}" style="font-size:12px;">${d.status==='open'?'미처리':'완료'}</span>
+      <span class="badge ${d.status}" style="font-size:12px;">${d.status==='open'?'미처리 Open':'완료 Done'}</span>
     </div>
-    <div class="detail-row"><div class="detail-key">차종</div><div class="detail-val">${d.carModel||'-'}</div></div>
-    <div class="detail-row"><div class="detail-key">품번</div><div class="detail-val" style="font-family:'DM Mono',monospace;">${d.partNo||'-'}</div></div>
-    <div class="detail-row"><div class="detail-key">품목명</div><div class="detail-val">${d.item}</div></div>
-    <div class="detail-row"><div class="detail-key">시리얼</div><div class="detail-val" style="font-family:'DM Mono',monospace;">${d.serial||'-'}</div></div>
-    <div class="detail-row"><div class="detail-key">불량 유형</div><div class="detail-val">${d.type}</div></div>
-    <div class="detail-row"><div class="detail-key">발생처</div><div class="detail-val">${d.occurrence||'-'}</div></div>
-    <div class="detail-row"><div class="detail-key">불량 수량</div><div class="detail-val">${d.qty||'-'} ea</div></div>
-    <div class="detail-row"><div class="detail-key">귀책처</div><div class="detail-val">${d.owner}</div></div>
-    <div class="detail-row"><div class="detail-key">등록일</div><div class="detail-val">${(d.date||"").slice(0,10)}</div></div>
-    <div class="detail-row"><div class="detail-key">불량 내용</div><div class="detail-val" style="line-height:1.7;">${d.desc}</div></div>
-    ${d.remark?`<div class="detail-row"><div class="detail-key">비고</div><div class="detail-val">${d.remark}</div></div>`:``}
+    <div class="detail-row"><div class="detail-key">차종<br><span style="font-size:10px;opacity:.6;">Model</span></div><div class="detail-val">${d.carModel||'-'}</div></div>
+    <div class="detail-row"><div class="detail-key">품번<br><span style="font-size:10px;opacity:.6;">Part No.</span></div><div class="detail-val" style="font-family:'DM Mono',monospace;">${d.partNo||'-'}</div></div>
+    <div class="detail-row"><div class="detail-key">품목명<br><span style="font-size:10px;opacity:.6;">Part Name</span></div><div class="detail-val">${d.item}</div></div>
+    <div class="detail-row"><div class="detail-key">시리얼<br><span style="font-size:10px;opacity:.6;">Serial</span></div><div class="detail-val" style="font-family:'DM Mono',monospace;">${d.serial||'-'}</div></div>
+    <div class="detail-row"><div class="detail-key">불량 유형<br><span style="font-size:10px;opacity:.6;">Defect Type</span></div><div class="detail-val">${d.type}${KO_EN[d.type]?'<br><span style="font-size:11px;color:var(--text-muted);">'+KO_EN[d.type]+'</span>':''}</div></div>
+    <div class="detail-row"><div class="detail-key">발생처<br><span style="font-size:10px;opacity:.6;">Occurrence</span></div><div class="detail-val">${d.occurrence||'-'}${KO_EN[d.occurrence]?'<br><span style="font-size:11px;color:var(--text-muted);">'+KO_EN[d.occurrence]+'</span>':''}</div></div>
+    <div class="detail-row"><div class="detail-key">불량 수량<br><span style="font-size:10px;opacity:.6;">Qty</span></div><div class="detail-val">${d.qty||'-'} ea</div></div>
+    <div class="detail-row"><div class="detail-key">귀책처<br><span style="font-size:10px;opacity:.6;">Responsibility</span></div><div class="detail-val">${d.owner}${KO_EN[d.owner]?'<br><span style="font-size:11px;color:var(--text-muted);">'+KO_EN[d.owner]+'</span>':''}</div></div>
+    <div class="detail-row"><div class="detail-key">등록일<br><span style="font-size:10px;opacity:.6;">Date</span></div><div class="detail-val">${(d.date||"").slice(0,10)}</div></div>
+    <div class="detail-row"><div class="detail-key">불량 내용<br><span style="font-size:10px;opacity:.6;">Description</span></div><div class="detail-val" style="line-height:1.7;">${d.desc}</div></div>
+    ${d.remark?`<div class="detail-row"><div class="detail-key">비고<br><span style="font-size:10px;opacity:.6;">Remark</span></div><div class="detail-val">${d.remark}</div></div>`:``}
   `;
   const btn=document.getElementById('detail-action-btn');
-  btn.textContent=d.status==='open'?'✅ 완료 처리':'🔄 미처리로 변경';
+  btn.textContent=d.status==='open'?'✅ 완료 처리 (Done)':'🔄 미처리로 변경 (Reopen)';
   btn.className=d.status==='open'?'btn btn-success':'btn btn-ghost';
   btn.onclick=()=>{ toggleStatus(partNo); closeDetail(); };
   document.getElementById('modal-detail').classList.add('open');
@@ -2511,7 +2579,7 @@ function updatePollBtn() {
     btn.style.color = 'var(--success)';
     btn.style.borderColor = 'rgba(5,122,85,0.4)';
   } else {
-    btn.innerHTML = '⏱ 자동동기화';
+    btn.innerHTML = '⏱ 자동동기화<br><span style="font-size:10px;font-weight:400;opacity:.6;">Auto Sync</span>';
     btn.style.color = 'var(--sidebar-text)';
     btn.style.borderColor = 'rgba(255,255,255,0.1)';
   }
@@ -2542,6 +2610,7 @@ renderDashboard();
 updateBadge();
 updateSheetBtn();
 updatePollBtn();
+updateFilterMonthLabel();
 if (GAS_URL) sheetLoad();
 </script>
 </body>

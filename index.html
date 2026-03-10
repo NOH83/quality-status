@@ -54,6 +54,9 @@ body {
   flex-direction: column;
   flex-shrink: 0;
   height: 100vh;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
 }
 
 .sidebar-logo {
@@ -196,13 +199,34 @@ body {
 /* ─── CONTENT ─── */
 .content {
   flex: 1;
-  overflow-y: auto;
-  padding: 24px 28px;
+  overflow: hidden;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 /* ─── PAGES ─── */
-.page { display: none; }
-.page.active { display: block; }
+.page { display: none !important; }
+
+/* 일반 페이지 (대시보드, 보고서 등) */
+.page.active {
+  display: block !important;
+  overflow-y: auto;
+  padding: 24px 28px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* 불량관리 페이지만 flex 레이아웃 */
+#page-defects.active {
+  display: flex !important;
+  flex-direction: column;
+  padding: 24px 28px 16px;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
 
 /* ─── KPI GRID ─── */
 .kpi-grid {
@@ -1135,18 +1159,26 @@ tbody tr:hover td { background: #f8faff; }
     </div><!-- /page-home -->
 
     <!-- ════ 불량 관리 ════ -->
-    <div id="page-defects" class="page" style="position:relative;">
-      <div class="filter-row">
+    <div id="page-defects" class="page" style="position:relative;display:flex;flex-direction:column;height:100%;">
+      <div class="filter-row" style="flex-wrap:wrap;gap:8px;flex-shrink:0;">
         <div class="search-wrap">
           <span class="search-icon-pos">🔍</span>
           <input class="search-input" placeholder="품목명, 유형, 귀책처 검색..." oninput="filterDefects(this.value)" id="search-inp">
         </div>
-        <!-- 월 선택 -->
-        <div style="display:flex;align-items:center;gap:6px;background:var(--white);border:1px solid var(--border-dark);border-radius:8px;padding:4px 10px;">
-          <button onclick="changeFilterMonth(-1)" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text-muted);padding:0 2px;">◀</button>
-          <span id="filter-month-label" style="font-size:13px;font-weight:700;color:var(--text);min-width:80px;text-align:center;"></span>
-          <button onclick="changeFilterMonth(1)" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text-muted);padding:0 2px;">▶</button>
-          <button onclick="filterMonth='';renderTable();document.getElementById('filter-month-label').textContent='전체 All';" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--text-muted);margin-left:2px;">전체 All</button>
+        <!-- 날짜 범위 선택 -->
+        <div style="display:flex;align-items:center;gap:6px;background:var(--white);border:1px solid var(--border-dark);border-radius:8px;padding:5px 10px;flex-wrap:wrap;">
+          <button onclick="changeFilterMonth(-1)" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text-muted);padding:0 2px;" title="이전 월">◀</button>
+          <span id="filter-month-label" style="font-size:12px;font-weight:700;color:var(--text);min-width:70px;text-align:center;"></span>
+          <button onclick="changeFilterMonth(1)" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text-muted);padding:0 2px;" title="다음 월">▶</button>
+          <div style="width:1px;height:18px;background:var(--border);margin:0 4px;"></div>
+          <span style="font-size:11px;color:var(--text-muted);font-weight:600;">시작</span>
+          <input type="date" id="filter-date-from" onchange="applyDateRange()"
+            style="border:1px solid var(--border-dark);border-radius:6px;padding:3px 7px;font-size:12px;color:var(--text);background:var(--surface);cursor:pointer;">
+          <span style="font-size:11px;color:var(--text-muted);">~</span>
+          <span style="font-size:11px;color:var(--text-muted);font-weight:600;">종료</span>
+          <input type="date" id="filter-date-to" onchange="applyDateRange()"
+            style="border:1px solid var(--border-dark);border-radius:6px;padding:3px 7px;font-size:12px;color:var(--text);background:var(--surface);cursor:pointer;">
+          <button onclick="clearDateRange()" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--text-muted);padding:2px 6px;border-radius:4px;border:1px solid var(--border);">전체 All</button>
         </div>
         <div style="margin-left:auto;display:flex;gap:8px;">
           <input type="file" id="excel-upload-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleExcelUpload(this)">
@@ -1155,8 +1187,8 @@ tbody tr:hover td { background: #f8faff; }
           <button class="btn btn-primary btn-sm" onclick="openModal()">＋ 불량 등록<br><span style="font-size:9px;opacity:.85;">Register</span></button>
         </div>
       </div>
-      <div class="card" style="padding:0;overflow:hidden;">
-        <div class="table-wrap" id="table-wrap-main">
+      <div class="card" style="padding:0;overflow:hidden;flex:1;display:flex;flex-direction:column;min-height:0;">
+        <div class="table-wrap" id="table-wrap-main" style="flex:1;overflow:auto;">
           <table id="defect-table">
             <thead>
               <tr>
@@ -1366,6 +1398,7 @@ tbody tr:hover td { background: #f8faff; }
             <option value="외관 불량">외관 불량 (Appearance)</option>
             <option value="용접 불량">용접 불량 (Welding)</option>
             <option value="기타">기타 (Others)</option>
+            <option value="공정 누락">공정 누락 (Process Omission)</option>
           </select>
         </div>
         <div class="form-group">
@@ -1373,7 +1406,7 @@ tbody tr:hover td { background: #f8faff; }
           <select class="form-select" id="f-sev">
             <option value="수입검사">수입검사 (Incoming)</option>
             <option value="프레스라인">프레스라인 (Press Line)</option>
-            <option value="조립라인">조립라인 (Assembly)</option>
+            <option value="조립라인">조립라인 (ASSY LINE)</option>
             <option value="PDI">PDI</option>
             <option value="HMI 1">HMI 1</option>
             <option value="HMI 2">HMI 2</option>
@@ -1502,6 +1535,7 @@ tbody tr:hover td { background: #f8faff; }
             <option value="외관 불량">외관 불량 (Appearance)</option>
             <option value="용접 불량">용접 불량 (Welding)</option>
             <option value="기타">기타 (Others)</option>
+            <option value="공정 누락">공정 누락 (Process Omission)</option>
           </select>
         </div>
         <div class="form-group">
@@ -1509,7 +1543,7 @@ tbody tr:hover td { background: #f8faff; }
           <select class="form-select" id="e-sev">
             <option value="수입검사">수입검사 (Incoming)</option>
             <option value="프레스라인">프레스라인 (Press Line)</option>
-            <option value="조립라인">조립라인 (Assembly)</option>
+            <option value="조립라인">조립라인 (ASSY LINE)</option>
             <option value="PDI">PDI</option>
             <option value="HMI 1">HMI 1</option>
             <option value="HMI 2">HMI 2</option>
@@ -1738,7 +1772,9 @@ function updateSheetBtn() {
 let searchQ='', filterSev='', filterStatus='';
 // 불량 관리 월 필터 (기본: 당월)
 const _now = new Date();
-let filterMonth = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}`;
+let filterMonth  = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}`;
+let filterDateFrom = '';  // 시작일 (YYYY-MM-DD)
+let filterDateTo   = '';  // 종료일 (YYYY-MM-DD)
 
 // 생산수량 데이터 { 'YYYY-MM': qty }
 let productionData = {};
@@ -1901,10 +1937,10 @@ function renderDashboard() {
 const KO_EN = {
   // 불량 유형
   '치수 불량': 'Dimensional', '외관 불량': 'Appearance',
-  '용접 불량': 'Welding',     '기타': 'Others',
+  '용접 불량': 'Welding',     '기타': 'Others', '공정 누락': 'Process Omission',
   // 발생처
   '수입검사': 'Incoming',   '프레스라인': 'Press Line',
-  '조립라인': 'Assembly',   'PDI': 'PDI',
+  '조립라인': 'ASSY LINE',   'PDI': 'PDI',
   'HMI 1': 'HMI 1',        'HMI 2': 'HMI 2',
   // 귀책처
   '자재': 'Material',  '품질': 'Quality',
@@ -2095,7 +2131,7 @@ function renderReport() {
   // KPI
   document.getElementById('r-total').textContent      = curr.length + '건';
   document.getElementById('r-total-sub').textContent  = `전체 누계 ${defects.length}건 중 (Total)`;
-  const rProdQty = productionData[reportYM] || 0;
+  const rProdQty = productionData[ym] || 0;
   const rCustPPM = rProdQty > 0 ? Math.round(customerDef.reduce((s,d)=>s+Number(d.qty||1),0) / rProdQty * 1000000) : null;
   document.getElementById('r-closed-rate').textContent = customerDef.length + '건';
   document.getElementById('r-closed-sub').textContent  = `HMI 1: ${curr.filter(d=>d.occurrence==='HMI 1').length}건 · HMI 2: ${curr.filter(d=>d.occurrence==='HMI 2').length}건`;
@@ -2311,12 +2347,48 @@ function getFiltered() {
     const qOk  = !searchQ      || Object.values(d).join(' ').toLowerCase().includes(searchQ.toLowerCase());
     const sOk  = !filterSev    || d.occurrence===filterSev;
     const stOk = !filterStatus || d.status===filterStatus;
-    const mOk  = !filterMonth  || (d.date||'').startsWith(filterMonth);
+    // 날짜 범위 우선, 없으면 월 필터
+    const dt = (d.date||'').slice(0,10);
+    let mOk = true;
+    if (filterDateFrom || filterDateTo) {
+      if (filterDateFrom && dt < filterDateFrom) mOk = false;
+      if (filterDateTo   && dt > filterDateTo)   mOk = false;
+    } else {
+      mOk = !filterMonth || dt.startsWith(filterMonth);
+    }
     return qOk && sOk && stOk && mOk;
   });
 }
 
+function applyDateRange() {
+  filterDateFrom = document.getElementById('filter-date-from').value;
+  filterDateTo   = document.getElementById('filter-date-to').value;
+  if (filterDateFrom || filterDateTo) {
+    filterMonth = '';
+    document.getElementById('filter-month-label').textContent = '범위 선택';
+  }
+  renderTable();
+}
+
+function clearDateRange() {
+  filterDateFrom = '';
+  filterDateTo   = '';
+  document.getElementById('filter-date-from').value = '';
+  document.getElementById('filter-date-to').value   = '';
+  filterMonth = '';
+  renderTable();
+  document.getElementById('filter-month-label').textContent = '전체 All';
+}
+
 function changeFilterMonth(dir) {
+  // 날짜 범위 초기화
+  filterDateFrom = '';
+  filterDateTo   = '';
+  const df = document.getElementById('filter-date-from');
+  const dt = document.getElementById('filter-date-to');
+  if (df) df.value = '';
+  if (dt) dt.value = '';
+
   if (!filterMonth) {
     const n = new Date();
     filterMonth = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
@@ -2358,10 +2430,10 @@ function renderTable() {
           ? `<span class="photo-icon-btn" data-idx="${idx}" title="${d.photos.length}장" style="cursor:pointer;font-size:20px;display:inline-block;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform='scale(1)'">📷</span><span style="font-size:10px;color:var(--text-muted);display:block;line-height:1.2;font-weight:600;">${d.photos.length}장</span>`
           : '<span style="color:var(--border-dark);font-size:16px;">—</span>'}
       </td>
-      <td style="font-size:12px;color:var(--text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.desc||'-'}</td>
+      <td style="font-size:12px;color:var(--text-muted);max-width:220px;white-space:pre-wrap;word-break:break-word;line-height:1.5;">${d.desc||'-'}</td>
       <td style="font-family:'DM Mono',monospace;text-align:center;">${d.qty||'-'}</td>
-      <td style="font-size:12px;color:var(--text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.counter||'-'}</td>
-      <td style="font-size:12px;color:var(--text-muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.remark||'-'}</td>
+      <td style="font-size:12px;color:var(--text-muted);max-width:220px;white-space:pre-wrap;word-break:break-word;line-height:1.5;">${d.counter||'-'}</td>
+      <td style="font-size:12px;color:var(--text-muted);max-width:160px;white-space:pre-wrap;word-break:break-word;line-height:1.5;">${d.remark||'-'}</td>
     </tr>`;
   }).join('');
   updateBadge();

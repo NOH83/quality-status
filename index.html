@@ -1662,13 +1662,15 @@ async function sheetLoad() {
   if (!GAS_URL) return;
   setLoadingBar(true);
   try {
-    // 불량 데이터 + 생산수량 병렬 로딩
-    const [res, prodRes] = await Promise.all([
+    // 불량 데이터 + 생산수량 + 발생처별 생산수량 병렬 로딩
+    const [res, prodRes, occProdRes] = await Promise.all([
       fetch(GAS_URL + '?t=' + Date.now()),
-      fetch(GAS_URL + '?action=production&t=' + Date.now())
+      fetch(GAS_URL + '?action=production&t=' + Date.now()),
+      fetch(GAS_URL + '?action=occ_production&t=' + Date.now())
     ]);
-    const json     = await res.json();
-    const prodJson = await prodRes.json();
+    const json       = await res.json();
+    const prodJson   = await prodRes.json();
+    const occProdJson = await occProdRes.json();
 
     if (!json.ok) throw new Error(json.error);
     if (json.data.length > 0) {
@@ -1699,11 +1701,40 @@ async function sheetLoad() {
       productionData = {};
       prodJson.data.forEach(r => { if(r.ym) productionData[r.ym] = Number(r.qty)||0; });
     }
+    if (occProdJson && occProdJson.ok && occProdJson.data) {
+      const OCC_KEYS = ['수입검사','프레스라인','조립라인','PDI','HMI 1','HMI 2'];
+      occProdData = {};
+      occProdJson.data.forEach(r => {
+        if (!r.ym) return;
+        occProdData[r.ym] = {};
+        OCC_KEYS.forEach(o => { occProdData[r.ym][o] = Number(r[o]||0); });
+      });
+    }
     renderHomeDefects(); renderTable(); updateBadge(); renderDashboard();
     showToast('success','Google Sheets 연동 완료', `불량 ${defects.length}건 불러왔습니다.`);
   } catch(e) {
     showToast('error','Sheets 연결 실패', e.message + '<br>URL을 다시 확인해 주세요.');
   } finally { setLoadingBar(false); }
+}
+
+
+// 발생처별 생산수량 저장 → Sheets
+async function saveOccProdQty(ym) {
+  const OCC_KEYS = ['수입검사','프레스라인','조립라인','PDI','HMI 1','HMI 2'];
+  const occQty = {};
+  OCC_KEYS.forEach(occ => {
+    const id = 'occ-prod-' + occ.replace(/ /g,'-');
+    const el = document.getElementById(id);
+    occQty[occ] = el ? Number(el.value)||0 : 0;
+  });
+  if (!GAS_URL) { showToast('error','저장 실패','Apps Script URL을 먼저 설정해 주세요.'); return; }
+  try {
+    await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ action:'occ_production_update', ym, occQty }) });
+    if (!occProdData[ym]) occProdData[ym] = {};
+    OCC_KEYS.forEach(o => { occProdData[ym][o] = occQty[o]; });
+    renderDashboard();
+    showToast('success','발생처별 생산수량 저장', ym + ' 저장 완료');
+  } catch(e) { showToast('error','저장 실패', e.message); }
 }
 
 // 생산수량 저장
@@ -1864,13 +1895,15 @@ function renderDashboard() {
   // 생산수량 입력 UI (대시보드 상단)
   const prodWrap = document.getElementById('prod-qty-wrap');
   if (prodWrap) {
+
+
     prodWrap.innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <span style="font-size:13px;color:var(--text-muted);font-weight:600;">📦 ${label} 생산수량</span>
+        <span style="font-size:13px;color:var(--text-muted);font-weight:600;">📦 ${label} 전체 생산수량</span>
         <input type="number" id="prod-qty-input" value="${prodQty||''}" placeholder="생산수량 입력"
-          style="width:140px;padding:6px 10px;border:1px solid var(--border-dark);border-radius:8px;font-size:13px;font-family:'DM Mono',monospace;">
+          style="width:140px;padding:6px 10px;border:1px solid var(--border-dark);border-radius:8px;font-size:13px;font-family:'DM Mono',monospace;background:var(--surface);">
         <button class="btn btn-primary btn-sm" onclick="saveProdQtyFromInput()">저장 <span style="font-size:9px;opacity:.85;">Save</span></button>
-        ${prodQty > 0 ? `<span style="font-size:12px;color:var(--success);font-weight:600;">✅ ${prodQty.toLocaleString()}개 등록됨</span>` : `<span style="font-size:12px;color:var(--danger);">⚠️ 미입력 시 PPM 계산 불가 (No Prod. Data)</span>`}
+        ${prodQty > 0 ? `<span style="font-size:12px;color:var(--success);font-weight:600;">✅ ${prodQty.toLocaleString()}개</span>` : `<span style="font-size:12px;color:var(--danger);">⚠️ 미입력 시 PPM 계산 불가</span>`}
       </div>`;
   }
 
@@ -1896,6 +1929,31 @@ function renderDashboard() {
           <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/max*100)}%;background:${colorFn(k,i)};transition:width 0.6s ease;"></div></div>
           <div class="bar-num">${cnt}건</div>
         </div>`).join('')
+      : '<div style="color:var(--text-muted);font-size:13px;padding:24px 0;text-align:center;">당월 데이터 없음 (No Data)</div>';
+  }
+
+
+  // 발생처별 바 차트 — 건수 오른편에 누적수량 · PPM 추가
+  function renderOccBar(elId, arr, colorFn, ym) {
+    const curOcc = occProdData[ym] || {};
+    const max = arr[0]?.[1] || 1;
+    document.getElementById(elId).innerHTML = arr.length
+      ? arr.map(([k, cnt], i) => {
+          const occProd = Number(curOcc[k] || 0);
+          const qty     = monthData.filter(d => d.occurrence === k).reduce((s,d)=>s+Number(d.qty||0),0);
+          const ppm     = occProd > 0 ? Math.round(qty / occProd * 1000000) : null;
+          const ppmTxt  = ppm !== null
+            ? `<span style="font-size:11px;font-family:'DM Mono',monospace;color:${colorFn(k,i)};font-weight:700;margin-left:6px;">${qty}개 · ${ppm.toLocaleString()} PPM</span>`
+            : `<span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text-light);margin-left:6px;">${qty}개</span>`;
+          return `
+            <div class="bar-row">
+              <div class="bar-lbl">${k}${KO_EN[k]?'<span style="font-size:10px;color:var(--text-muted);font-weight:400;"> '+KO_EN[k]+'</span>':''}</div>
+              <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/max*100)}%;background:${colorFn(k,i)};transition:width 0.6s ease;"></div></div>
+              <div style="display:flex;align-items:center;white-space:nowrap;">
+                <span class="bar-num">${cnt}건</span>${ppmTxt}
+              </div>
+            </div>`;
+        }).join('')
       : '<div style="color:var(--text-muted);font-size:13px;padding:24px 0;text-align:center;">당월 데이터 없음 (No Data)</div>';
   }
 
@@ -1938,7 +1996,7 @@ function renderDashboard() {
   // 차트 렌더링 (모두 당월 기준)
   renderDonut('chart-type', groupBy(monthData,'type'), typeColors);
   renderBar('chart-model',      groupBy(monthData,'carModel'),   (k,i)=>modelColors[i%modelColors.length]);
-  renderBar('chart-occurrence', groupBy(monthData,'occurrence'), (k)=>occColorMap[k]||'#9aa5b4');
+  renderOccBar('chart-occurrence', groupBy(monthData,'occurrence'), (k)=>occColorMap[k]||'#9aa5b4', thisYM);
   renderBar('chart-owner',      groupBy(monthData,'owner'),      (k,i)=>ownerColors[i%ownerColors.length]);
   renderBar('chart-item',       groupBy(monthData,'item'),       (k,i)=>itemColors[i%itemColors.length]);
 
@@ -2076,15 +2134,31 @@ function renderOccurrenceTrend(now) {
   const n = weeks.length;
   const W = 440, H = 110, padT = 20, padB = 22, padL = 5, padR = 15;
 
+  // 당월 발생처별 생산수량
+  const nowYM = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const curOccProd = (occProdData[nowYM] || {});
+
   wrap.innerHTML = ALL_OCC.map(occ => {
-    const color  = occColorMap[occ] || '#9aa5b4';
-    const counts = weeks.map(w =>
-      defects.filter(d => {
+    const color   = occColorMap[occ] || '#9aa5b4';
+    const occProd = Number(curOccProd[occ] || 0); // 발생처별 생산수량
+
+    // 주차별 건수 및 불량수량(qty)
+    const weekData = weeks.map(w => {
+      const filtered = defects.filter(d => {
         const dt = (d.date || '').slice(0, 10);
         return dt >= w.monStr && dt <= w.sunStr && d.occurrence === occ;
-      }).length
-    );
-    const total  = counts.reduce((a, b) => a + b, 0);
+      });
+      return {
+        cnt: filtered.length,
+        qty: filtered.reduce((s, d) => s + Number(d.qty || 0), 0)
+      };
+    });
+
+    const total    = weekData.reduce((s, w) => s + w.cnt, 0);
+    const totalQty = weekData.reduce((s, w) => s + w.qty, 0);
+    const totalPPM = occProd > 0 ? Math.round(totalQty / occProd * 1000000) : null;
+
+    const counts = weekData.map(w => w.cnt);
     const maxVal = Math.max(...counts, 1);
     const xs     = n < 2
       ? counts.map((_, i) => Math.round(padL + i / Math.max(n-1,1) * (W - padL - padR)))
@@ -2097,20 +2171,35 @@ function renderOccurrenceTrend(now) {
       `<line x1="${padL}" y1="${Math.round(padT + r*(H-padT-padB))}" x2="${W-padR}" y2="${Math.round(padT + r*(H-padT-padB))}" stroke="#e4e9f0" stroke-dasharray="3"/>`
     ).join('');
 
-    const dots = xs.map((x, i) => `
-      <circle cx="${x}" cy="${ys[i]}" r="3.5" fill="${color}" stroke="#fff" stroke-width="1.5"/>
-      <text x="${x}" y="${ys[i]-8}" fill="${color}" font-size="10" font-weight="700"
-        text-anchor="${i===0?'start':i===n-1?'end':'middle'}" font-family="DM Mono">${counts[i]}</text>
-      <text x="${x}" y="${H}" fill="${i===n-1?color:'#9aa5b4'}" font-size="10"
-        text-anchor="${i===0?'start':i===n-1?'end':'middle'}" font-family="DM Mono">${weeks[i].label}</text>
-    `).join('');
+    const dots = xs.map((x, i) => {
+      const wPPM = occProd > 0 && weekData[i].qty > 0
+        ? Math.round(weekData[i].qty / occProd * 1000000)
+        : null;
+      const ppmTxt = wPPM !== null ? ` (${wPPM.toLocaleString()})` : '';
+      // 건수 + (PPM)을 한 줄로 표시
+      const label = counts[i] > 0 ? `${counts[i]}${ppmTxt}` : '0';
+      return `
+        <circle cx="${x}" cy="${ys[i]}" r="3.5" fill="${color}" stroke="#fff" stroke-width="1.5"/>
+        <text x="${x}" y="${ys[i]-9}" fill="${color}" font-size="9" font-weight="700"
+          text-anchor="${i===0?'start':i===n-1?'end':'middle'}" font-family="DM Mono">${label}</text>
+        <text x="${x}" y="${H}" fill="${i===n-1?color:'#9aa5b4'}" font-size="10"
+          text-anchor="${i===0?'start':i===n-1?'end':'middle'}" font-family="DM Mono">${weeks[i].label}</text>
+      `;
+    }).join('');
+
+    // 발생처 옆: 누적수량 · 누적PPM
+    const qtyBadge = `<span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text-muted);margin-left:8px;">누적 ${totalQty}개</span>`;
+    const ppmBadge = totalPPM !== null
+      ? `<span style="font-size:11px;font-family:'DM Mono',monospace;color:${color};font-weight:700;margin-left:4px;">${totalPPM.toLocaleString()} PPM</span>`
+      : `<span style="font-size:10px;color:var(--text-light);margin-left:4px;">PPM 미산출</span>`;
 
     return `
       <div style="background:var(--bg);border-radius:10px;padding:14px 16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <div style="display:flex;align-items:center;gap:7px;">
-            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};"></span>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:4px;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></span>
             <span style="font-size:13px;font-weight:700;color:var(--text);">${occ}${KO_EN[occ]?'<span style="font-size:10px;font-weight:400;color:var(--text-muted);margin-left:4px;">'+KO_EN[occ]+'</span>':''}</span>
+            ${qtyBadge}${ppmBadge}
           </div>
           <span style="font-size:12px;font-family:'DM Mono',monospace;color:${total>0?color:'var(--text-muted)'};font-weight:700;">당월(M) ${total}건</span>
         </div>

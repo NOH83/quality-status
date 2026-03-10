@@ -2334,9 +2334,13 @@ function updateFilterMonthLabel() {
 function renderTable() {
   const list=getFiltered(), tbody=document.getElementById('defect-tbody');
   if(!list.length){ tbody.innerHTML=`<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">🔍</div><p>해당하는 불량이 없습니다.</p></div></td></tr>`; return; }
-  tbody.innerHTML=list.map((d,i)=>`
-    <tr data-partno="${encodeURIComponent(d.partNo)}" class="defect-row">
-      <td><button class="btn btn-sm edit-btn" data-partno="${encodeURIComponent(d.partNo)}" style="background:var(--accent-light);color:var(--accent);border:1px solid #c7d7ff;padding:4px 7px;">✏️</button></td>
+
+  tbody.innerHTML=list.map((d)=>{
+    // defects 배열의 실제 인덱스를 data-idx로 저장 → 같은 품번 여러 행 정확히 구분
+    const idx = defects.indexOf(d);
+    return `
+    <tr class="defect-row">
+      <td><button class="btn btn-sm edit-btn" data-idx="${idx}" style="background:var(--accent-light);color:var(--accent);border:1px solid #c7d7ff;padding:4px 7px;">✏️</button></td>
       <td style="font-weight:600;">${d.carModel||'-'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);">${d.partNo||'-'}</td>
       <td style="font-weight:600;">${d.item}</td>
@@ -2346,27 +2350,27 @@ function renderTable() {
       <td style="font-family:'DM Mono',monospace;font-size:12px;">${(d.date||'').slice(0,10)}</td>
       <td style="text-align:center;">
         ${Array.isArray(d.photos)&&d.photos.length
-          ? `<span class="photo-icon-btn" data-partno="${encodeURIComponent(d.partNo)}" title="${d.photos.length}장" style="cursor:pointer;font-size:20px;display:inline-block;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform='scale(1)'">📷</span><span style="font-size:10px;color:var(--text-muted);display:block;line-height:1.2;font-weight:600;">${d.photos.length}장</span>`
+          ? `<span class="photo-icon-btn" data-idx="${idx}" title="${d.photos.length}장" style="cursor:pointer;font-size:20px;display:inline-block;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform='scale(1)'">📷</span><span style="font-size:10px;color:var(--text-muted);display:block;line-height:1.2;font-weight:600;">${d.photos.length}장</span>`
           : '<span style="color:var(--border-dark);font-size:16px;">—</span>'}
       </td>
       <td style="font-size:12px;color:var(--text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.desc||'-'}</td>
       <td style="font-family:'DM Mono',monospace;text-align:center;">${d.qty||'-'}</td>
       <td style="font-size:12px;color:var(--text-muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.remark||'-'}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   updateBadge();
 
-  // 클릭 이벤트 처리
+  // 클릭 이벤트: data-idx 기반으로 정확한 defect 참조
   tbody.onclick = function(e) {
     const editBtn = e.target.closest('.edit-btn');
     if (editBtn) {
-      openEditModal(decodeURIComponent(editBtn.dataset.partno));
+      openEditModal(Number(editBtn.dataset.idx));
       return;
     }
     const photoBtn = e.target.closest('.photo-icon-btn');
     if (photoBtn) {
       e.stopPropagation();
-      const partNo = decodeURIComponent(photoBtn.dataset.partno);
-      const d = defects.find(x => x.partNo === partNo);
+      const d = defects[Number(photoBtn.dataset.idx)];
       if (d) openPhotoViewer(d);
       return;
     }
@@ -2503,9 +2507,11 @@ async function submitDefect(){
 
 // ══ 편집 ══
 let editingId=null;
-function openEditModal(id){
-  const d=defects.find(x=>x.partNo===id); if(!d) return;
-  editingId=id;
+let editingIdx=null;
+function openEditModal(idx){
+  const d=defects[idx]; if(!d) return;
+  editingIdx=idx;
+  editingId=d.partNo; // 하위 호환용
   document.getElementById('edit-id-label').textContent=`품번: ${d.partNo}`;
   document.getElementById('e-carmodel').value = d.carModel||'';
   document.getElementById('e-partno').value   = d.partNo||'';
@@ -2531,6 +2537,7 @@ function setSelectVal(id,val){
   for(let opt of sel.options){ if(opt.value===val||opt.text===val){sel.value=opt.value;break;} }
 }
 function closeEditModal(){
+  editingIdx=null;
   uploadedPhotos=[]; renderEditPhotoGrid();
   document.getElementById('modal-edit').classList.remove('open');
   const fab = document.querySelector('.fab-btn');
@@ -2540,7 +2547,7 @@ function closeEditModal(){
 async function saveEdit(){
   const item=document.getElementById('e-item').value.trim();
   if(!item){ alert('품목명을 입력하세요.'); return; }
-  const d=defects.find(x=>x.partNo===editingId); if(!d) return;
+  const d = editingIdx !== null ? defects[editingIdx] : defects.find(x=>x.partNo===editingId); if(!d) return;
   d.carModel   = document.getElementById('e-carmodel').value||'-';
   d.partNo     = document.getElementById('e-partno').value||d.partNo;
   d.item=item; d.serial='-';
@@ -2555,11 +2562,13 @@ async function saveEdit(){
 }
 
 async function deleteDefect(){
-  if(!confirm(`[품번: ${editingId}] 불량을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
-  defects=defects.filter(x=>x.partNo!==editingId);
+  const delTarget = editingIdx !== null ? defects[editingIdx] : defects.find(x=>x.partNo===editingId);
+  if(!delTarget) return;
+  if(!confirm(`[품번: ${delTarget.partNo}] 불량을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+  defects.splice(defects.indexOf(delTarget), 1);
   closeEditModal(); renderTable(); renderHomeDefects(); updateBadge(); renderDashboard();
-  await sheetDelete(editingId);
-  showToast('info','삭제 완료',`품번 ${editingId}${GAS_URL?' · Sheets에서도 삭제됨':''}`);
+  await sheetDelete(delTarget.partNo);
+  showToast('info','삭제 완료',`품번 ${delTarget.partNo}${GAS_URL?' · Sheets에서도 삭제됨':''}`);
 }
 
 // ══ 엑셀 다운로드 ══

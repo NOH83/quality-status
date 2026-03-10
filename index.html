@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>품질 현황 관리 시스템</title>
+<title>품질 관리 시스템</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -863,6 +863,71 @@ tbody tr:hover td { background: #f8faff; }
 </head>
 <body>
 
+<!-- ─── 비밀번호 잠금 화면 ─── -->
+<div id="lock-screen" style="
+  position:fixed;inset:0;z-index:99999;
+  background:linear-gradient(135deg,#0f1923 0%,#1a2d40 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Noto Sans KR',sans-serif;
+">
+  <div style="
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:20px;padding:48px 40px;
+    width:100%;max-width:380px;text-align:center;
+    box-shadow:0 24px 60px rgba(0,0,0,0.5);
+  ">
+    <div style="margin-bottom:8px;"><span style="font-size:36px;">🏭</span></div>
+    <div style="font-size:11px;font-weight:600;color:#4a9eff;letter-spacing:2px;margin-bottom:6px;">QMS V1.0</div>
+    <div style="font-size:20px;font-weight:700;color:#fff;margin-bottom:4px;">품질 관리 시스템</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:32px;">Quality Management System</div>
+
+    <div style="position:relative;margin-bottom:12px;">
+      <input id="lock-input" type="password"
+        placeholder="비밀번호 입력 · Enter Password"
+        onkeydown="if(event.key==='Enter')checkPassword()"
+        style="
+          width:100%;box-sizing:border-box;
+          padding:14px 48px 14px 18px;
+          border-radius:10px;border:1.5px solid rgba(255,255,255,0.15);
+          background:rgba(255,255,255,0.08);
+          color:#fff;font-size:15px;
+          font-family:'Noto Sans KR',sans-serif;
+          outline:none;transition:border 0.2s;
+          letter-spacing:3px;
+        "
+        onfocus="this.style.borderColor='#4a9eff'"
+        onblur="this.style.borderColor='rgba(255,255,255,0.15)'"
+      >
+      <button onclick="toggleLockPw()" style="
+        position:absolute;right:14px;top:50%;transform:translateY(-50%);
+        background:none;border:none;cursor:pointer;
+        color:rgba(255,255,255,0.5);font-size:16px;padding:0;
+      " id="lock-eye-btn">👁</button>
+    </div>
+
+    <div id="lock-error" style="
+      font-size:12px;color:#ff6b6b;margin-bottom:12px;
+      height:18px;transition:opacity 0.3s;opacity:0;
+    ">비밀번호가 올바르지 않습니다 · Incorrect Password</div>
+
+    <button onclick="checkPassword()" style="
+      width:100%;padding:14px;border-radius:10px;
+      background:linear-gradient(135deg,#1a56db,#4a9eff);
+      border:none;color:#fff;font-size:15px;font-weight:700;
+      font-family:'Noto Sans KR',sans-serif;cursor:pointer;
+      transition:opacity 0.2s;letter-spacing:0.5px;
+    "
+    onmouseover="this.style.opacity='.88'"
+    onmouseout="this.style.opacity='1'"
+    >확인 · Confirm</button>
+
+    <div style="margin-top:20px;font-size:11px;color:rgba(255,255,255,0.25);">
+      권한이 없는 접근은 금지됩니다<br>Unauthorized access is prohibited
+    </div>
+  </div>
+</div>
+
 <!-- SYNC CHIP -->
 <div class="sync-chip" id="sync-chip">
   <span class="poll-dot"></span>
@@ -896,7 +961,7 @@ tbody tr:hover td { background: #f8faff; }
 <div class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-tag">QMS v1.0</div>
-    <div class="logo-title">품질 현황<br>관리 시스템<br><span style="font-size:10px;font-weight:400;opacity:.6;letter-spacing:0.5px;">Quality Management</span></div>
+    <div class="logo-title">품질 관리<br>시스템<br><span style="font-size:10px;font-weight:400;opacity:.6;letter-spacing:0.5px;">Quality Management</span></div>
   </div>
   <div class="sidebar-section-label">메뉴 · Menu</div>
   <div class="nav-item active" onclick="goPage('home',this)">
@@ -941,7 +1006,7 @@ tbody tr:hover td { background: #f8faff; }
       </button>
       <div class="topbar-left">
         <h2 id="page-title">📊 대시보드</h2>
-        <div class="breadcrumb" id="page-sub">품질 현황</div>
+        <div class="breadcrumb" id="page-sub">품질 관리</div>
       </div>
     </div>
     <div class="topbar-right">
@@ -1632,7 +1697,7 @@ let uploadedPhotos=[];
 
 // ══ NAVIGATION ══
 const pageInfo = {
-  home:    { title:'📊 대시보드',        sub:(() => { const n=new Date(); return `품질 현황 · ${n.getFullYear()}년 ${n.getMonth()+1}월`; })() },
+  home:    { title:'📊 대시보드',        sub:(() => { const n=new Date(); return `품질 관리 · ${n.getFullYear()}년 ${n.getMonth()+1}월`; })() },
   defects: { title:'🔴 불량 관리',       sub:'등록 및 추적 · Defect Management' },
   report:  { title:'📄 월간 보고서',     sub:(() => { const n=new Date(); return `${n.getFullYear()}년 ${n.getMonth()+1}월 품질 실적`; })() },
 };
@@ -1725,16 +1790,16 @@ function renderDashboard() {
     document.getElementById(elId).innerHTML = arr.length
       ? arr.map(([k,cnt],i) => `
         <div class="bar-row">
-          <div class="bar-lbl">${k}</div>
+          <div class="bar-lbl">${k}${KO_EN[k]?'<span style="font-size:10px;color:var(--text-muted);font-weight:400;"> '+KO_EN[k]+'</span>':''}</div>
           <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/max*100)}%;background:${colorFn(k,i)};transition:width 0.6s ease;"></div></div>
           <div class="bar-num">${cnt}건</div>
         </div>`).join('')
-      : '<div style="color:var(--text-muted);font-size:13px;padding:24px 0;text-align:center;">당월 데이터 없음</div>';
+      : '<div style="color:var(--text-muted);font-size:13px;padding:24px 0;text-align:center;">당월 데이터 없음 (No Data)</div>';
   }
 
   function renderDonut(elId, arr, colors) {
     const tot = arr.reduce((s,[,v])=>s+v,0);
-    if (!arr.length) { document.getElementById(elId).innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:40px 0;text-align:center;">당월 데이터 없음</div>'; return; }
+    if (!arr.length) { document.getElementById(elId).innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:40px 0;text-align:center;">당월 데이터 없음 (No Data)</div>'; return; }
     const cx=100,cy=100,R=80,r=50;
     let startAngle = -Math.PI/2, slices = '';
     arr.forEach(([type,cnt],i) => {
@@ -1752,7 +1817,7 @@ function renderDashboard() {
       if (pct >= 5) slices += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" fill="${color}" font-size="10" font-weight="700" font-family="DM Mono">${pct}%</text>`;
       startAngle += angle;
     });
-    slices += `<text x="${cx}" y="${cy-7}" text-anchor="middle" fill="var(--text)" font-size="11" font-family="Noto Sans KR">당월</text>`;
+    slices += `<text x="${cx}" y="${cy-7}" text-anchor="middle" fill="var(--text)" font-size="10" font-family="Noto Sans KR">당월(M)</text>`;
     slices += `<text x="${cx}" y="${cy+10}" text-anchor="middle" fill="var(--text)" font-size="18" font-weight="700" font-family="DM Mono">${tot}</text>`;
     slices += `<text x="${cx}" y="${cy+26}" text-anchor="middle" fill="var(--text-muted)" font-size="10" font-family="Noto Sans KR">건</text>`;
     const legend = arr.map(([type,cnt],i)=>`
@@ -1943,9 +2008,9 @@ function renderOccurrenceTrend(now) {
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
           <div style="display:flex;align-items:center;gap:7px;">
             <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};"></span>
-            <span style="font-size:13px;font-weight:700;color:var(--text);">${occ}</span>
+            <span style="font-size:13px;font-weight:700;color:var(--text);">${occ}${KO_EN[occ]?'<span style="font-size:10px;font-weight:400;color:var(--text-muted);margin-left:4px;">'+KO_EN[occ]+'</span>':''}</span>
           </div>
-          <span style="font-size:12px;font-family:'DM Mono',monospace;color:${total>0?color:'var(--text-muted)'};font-weight:700;">당월 ${total}건</span>
+          <span style="font-size:12px;font-family:'DM Mono',monospace;color:${total>0?color:'var(--text-muted)'};font-weight:700;">당월(M) ${total}건</span>
         </div>
         <svg width="100%" height="${H}" viewBox="-5 0 ${W+10} ${H}" preserveAspectRatio="none">
           ${gridLines}
@@ -2008,24 +2073,24 @@ function renderReport() {
   }
 
   function renderBar(elId, subId, arr, colorFn, subText) {
-    if(subId) document.getElementById(subId).textContent = subText || label + ' 기준';
+    if(subId) document.getElementById(subId).textContent = subText || label + ' 기준 (Base)';
     const max = arr[0]?.[1] || 1;
     document.getElementById(elId).innerHTML = arr.length
       ? arr.map(([k,cnt],i) => `
         <div class="bar-row">
-          <div class="bar-lbl">${k}</div>
+          <div class="bar-lbl">${k}${KO_EN[k]?'<span style="font-size:10px;color:var(--text-muted);font-weight:400;"> '+KO_EN[k]+'</span>':''}</div>
           <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/max*100)}%;background:${colorFn(k,i)};transition:width 0.6s ease;"></div></div>
           <div class="bar-num">${cnt}건</div>
         </div>`).join('')
-      : '<div style="color:var(--text-muted);font-size:13px;padding:24px 0;text-align:center;">당월 데이터 없음</div>';
+      : '<div style="color:var(--text-muted);font-size:13px;padding:24px 0;text-align:center;">당월 데이터 없음 (No Data)</div>';
   }
 
   // 불량 유형 도넛 차트
   const typeArr = groupBy(curr, 'type');
   const typeTot = typeArr.reduce((s,[,v])=>s+v, 0);
-  document.getElementById('r-type-sub').textContent = label + ' 기준';
+  document.getElementById('r-type-sub').textContent = label + ' 기준 (Base)';
   if (!typeArr.length) {
-    document.getElementById('r-chart-type').innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:40px 0;text-align:center;">당월 데이터 없음</div>';
+    document.getElementById('r-chart-type').innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:40px 0;text-align:center;">당월 데이터 없음 (No Data)</div>';
   } else {
     const cx=100,cy=100,R=80,r=50;
     let sa=-Math.PI/2, slices='';
@@ -2042,13 +2107,13 @@ function renderReport() {
       if(pct>=5) slices+=`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" fill="${col}" font-size="10" font-weight="700" font-family="DM Mono">${pct}%</text>`;
       sa+=angle;
     });
-    slices+=`<text x="${cx}" y="${cy-7}" text-anchor="middle" fill="var(--text)" font-size="11" font-family="Noto Sans KR">당월</text>`;
+    slices+=`<text x="${cx}" y="${cy-7}" text-anchor="middle" fill="var(--text)" font-size="10" font-family="Noto Sans KR">당월(M)</text>`;
     slices+=`<text x="${cx}" y="${cy+10}" text-anchor="middle" fill="var(--text)" font-size="18" font-weight="700" font-family="DM Mono">${typeTot}</text>`;
     slices+=`<text x="${cx}" y="${cy+26}" text-anchor="middle" fill="var(--text-muted)" font-size="10" font-family="Noto Sans KR">건</text>`;
     const legend=typeArr.map(([t,cnt],i)=>`
       <div style="display:flex;align-items:center;gap:6px;font-size:12px;margin-bottom:6px;">
         <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${typeColors[i%typeColors.length]};flex-shrink:0;"></span>
-        <span style="flex:1;color:var(--text);">${t}</span>
+        <span style="flex:1;color:var(--text);">${t}${KO_EN[t]?'<span style="font-size:10px;color:var(--text-muted);"> '+KO_EN[t]+'</span>':''}</span>
         <span style="font-family:'DM Mono',monospace;color:var(--text-muted);">${cnt}건</span>
       </div>`).join('');
     document.getElementById('r-chart-type').innerHTML=`
@@ -2103,7 +2168,7 @@ function renderReport() {
   document.getElementById('r-occ-trend-sub').textContent = `${reportYear}년 발생처별 월별 현황 (By Occurrence)`;
   const rOccWrap = document.getElementById('r-occ-charts-wrap');
   const occSet = [...new Set(defects.map(d=>d.occurrence||'').filter(Boolean))];
-  if (!occSet.length) { rOccWrap.innerHTML='<div style="color:var(--text-muted);font-size:13px;padding:16px;text-align:center;">데이터 없음</div>'; }
+  if (!occSet.length) { rOccWrap.innerHTML='<div style="color:var(--text-muted);font-size:13px;padding:16px;text-align:center;">데이터 없음 (No Data)</div>'; }
   else {
     const W2=440, H2=110, padT2=20, padB2=22, padL=5, padR=15, n2=12;
     rOccWrap.innerHTML = occSet.map(occ => {
@@ -2129,9 +2194,9 @@ function renderReport() {
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
             <div style="display:flex;align-items:center;gap:7px;">
               <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};"></span>
-              <span style="font-size:13px;font-weight:700;color:var(--text);">${occ}</span>
+              <span style="font-size:13px;font-weight:700;color:var(--text);">${occ}${KO_EN[occ]?'<span style="font-size:10px;font-weight:400;color:var(--text-muted);margin-left:4px;">'+KO_EN[occ]+'</span>':''}</span>
             </div>
-            <span style="font-size:12px;font-family:'DM Mono',monospace;color:${color};font-weight:700;">연간 ${total2}건</span>
+            <span style="font-size:12px;font-family:'DM Mono',monospace;color:${color};font-weight:700;">연간(Y) ${total2}건</span>
           </div>
           <svg width="100%" height="${H2}" viewBox="-5 0 ${W2+10} ${H2}" preserveAspectRatio="none">
             ${gridL}
@@ -2144,7 +2209,7 @@ function renderReport() {
   }
 
   // 당월 불량 목록
-  document.getElementById('r-list-sub').textContent = `${ym} 등록 · ${curr.length}건`;
+  document.getElementById('r-list-sub').textContent = `${ym} 등록(Registered) · ${curr.length}건`;
   const statusKo = { open:'미처리<br><span style="font-size:10px;font-weight:400;">Open</span>', closed:'완료<br><span style="font-size:10px;font-weight:400;">Done</span>' };
   document.getElementById('r-tbody').innerHTML = curr.length
     ? [...curr].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(d=>`
@@ -2152,14 +2217,14 @@ function renderReport() {
           <td>${d.carModel||'-'}</td>
           <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);">${d.partNo||'-'}</td>
           <td style="font-weight:600;">${d.item}</td>
-          <td>${d.type}</td>
-          <td>${d.occurrence||'-'}</td>
+          <td>${biLang(d.type)}</td>
+          <td>${biLang(d.occurrence)||'-'}</td>
           <td style="font-family:'DM Mono',monospace;">${d.qty||'-'}</td>
-          <td>${d.owner||'-'}</td>
+          <td>${biLang(d.owner)||'-'}</td>
           <td style="font-family:'DM Mono',monospace;font-size:11px;">${(d.date||'').slice(0,10)}</td>
           <td><span class="badge ${d.status}">${statusKo[d.status]||d.status}</span></td>
         </tr>`).join('')
-    : '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:20px;">당월 불량 데이터가 없습니다.</td></tr>';
+    : '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:20px;">당월 불량 데이터가 없습니다. (No Defects)</td></tr>';
 
   // 종합 의견
   const topType  = groupBy(curr,'type')[0]?.[0]  || '-';
@@ -2602,6 +2667,41 @@ async function silentSheetLoad() {
       showToast('info','Sheets 변경 감지', `${defects.length}건으로 업데이트되었습니다.`, 2500);
     }
   } catch(e) { /* 폴링 오류 무시 */ }
+}
+
+
+// ══ 비밀번호 잠금 ══
+const APP_PASSWORD = '1234';  // ← 여기서 비밀번호 변경
+
+function checkPassword() {
+  const val = document.getElementById('lock-input').value;
+  const err = document.getElementById('lock-error');
+  if (val === APP_PASSWORD) {
+    const ls = document.getElementById('lock-screen');
+    ls.style.transition = 'opacity 0.4s';
+    ls.style.opacity = '0';
+    setTimeout(() => ls.style.display = 'none', 400);
+  } else {
+    err.style.opacity = '1';
+    document.getElementById('lock-input').value = '';
+    document.getElementById('lock-input').style.borderColor = '#ff6b6b';
+    setTimeout(() => {
+      err.style.opacity = '0';
+      document.getElementById('lock-input').style.borderColor = 'rgba(255,255,255,0.15)';
+    }, 2000);
+  }
+}
+
+function toggleLockPw() {
+  const inp = document.getElementById('lock-input');
+  const btn = document.getElementById('lock-eye-btn');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    inp.type = 'password';
+    btn.textContent = '👁';
+  }
 }
 
 // ══ INIT ══

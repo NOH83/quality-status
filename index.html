@@ -885,6 +885,24 @@ tbody tr:hover td { background: #f8faff; }
   /* sync-chip 위치 조정 */
   .sync-chip { bottom: 70px; }
 }
+
+/* 발생처 탭 */
+.occ-tab {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border-dark);
+  background: var(--white);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.occ-tab:hover { border-color: var(--accent); color: var(--accent); }
+.occ-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -1033,10 +1051,7 @@ tbody tr:hover td { background: #f8faff; }
         <div class="breadcrumb" id="page-sub">품질 관리</div>
       </div>
     </div>
-    <div class="topbar-right">
-      <button class="btn btn-ghost btn-sm">📥 내보내기<br><span style="font-size:9px;opacity:.7;">Export</span></button>
-      <button class="btn btn-primary btn-sm" onclick="openModal()">＋ 불량 등록<br><span style="font-size:9px;opacity:.85;">Register</span></button>
-    </div>
+
   </div>
 
   <!-- CONTENT -->
@@ -1161,10 +1176,6 @@ tbody tr:hover td { background: #f8faff; }
     <!-- ════ 불량 관리 ════ -->
     <div id="page-defects" class="page" style="position:relative;display:flex;flex-direction:column;height:100%;">
       <div class="filter-row" style="flex-wrap:wrap;gap:8px;flex-shrink:0;">
-        <div class="search-wrap">
-          <span class="search-icon-pos">🔍</span>
-          <input class="search-input" placeholder="품목명, 유형, 귀책처 검색..." oninput="filterDefects(this.value)" id="search-inp">
-        </div>
         <!-- 날짜 범위 선택 -->
         <div style="display:flex;align-items:center;gap:6px;background:var(--white);border:1px solid var(--border-dark);border-radius:8px;padding:5px 10px;flex-wrap:wrap;">
           <button onclick="changeFilterMonth(-1)" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text-muted);padding:0 2px;" title="이전 월">◀</button>
@@ -1186,6 +1197,16 @@ tbody tr:hover td { background: #f8faff; }
           <button class="btn btn-ghost btn-sm" onclick="downloadExcel()">📥 엑셀 다운로드<br><span style="font-size:9px;opacity:.7;">Excel Download</span></button>
           <button class="btn btn-primary btn-sm" onclick="openModal()">＋ 불량 등록<br><span style="font-size:9px;opacity:.85;">Register</span></button>
         </div>
+      </div>
+      <div id="occ-tab-wrap" style="display:flex;gap:6px;flex-wrap:wrap;padding:8px 0 4px 0;flex-shrink:0;">
+        <button class="occ-tab active" data-occ="" onclick="setOccTab(this,'')">전체<span style="font-size:9px;opacity:.7;margin-left:3px;">All</span></button>
+        <button class="occ-tab" data-occ="수입검사" onclick="setOccTab(this,'수입검사')">수입검사<span style="font-size:9px;opacity:.7;margin-left:3px;">Incoming</span></button>
+        <button class="occ-tab" data-occ="프레스라인" onclick="setOccTab(this,'프레스라인')">프레스라인<span style="font-size:9px;opacity:.7;margin-left:3px;">Press Line</span></button>
+        <button class="occ-tab" data-occ="조립라인" onclick="setOccTab(this,'조립라인')">조립라인<span style="font-size:9px;opacity:.7;margin-left:3px;">ASSY LINE</span></button>
+        <button class="occ-tab" data-occ="PDI" onclick="setOccTab(this,'PDI')">PDI</button>
+        <button class="occ-tab" data-occ="HMI 1" onclick="setOccTab(this,'HMI 1')">HMI 1</button>
+        <button class="occ-tab" data-occ="HMI 2" onclick="setOccTab(this,'HMI 2')">HMI 2</button>
+        <button class="occ-tab" data-occ="HMI" onclick="setOccTab(this,'HMI')">HMI<span style="font-size:9px;opacity:.7;margin-left:3px;">1+2</span></button>
       </div>
       <div class="card" style="padding:0;overflow:hidden;flex:1;display:flex;flex-direction:column;min-height:0;">
         <div class="table-wrap" id="table-wrap-main" style="flex:1;overflow:auto;">
@@ -2345,7 +2366,7 @@ function renderHomeDefects() {
 function getFiltered() {
   return defects.filter(d=>{
     const qOk  = !searchQ      || Object.values(d).join(' ').toLowerCase().includes(searchQ.toLowerCase());
-    const sOk  = !filterSev    || d.occurrence===filterSev;
+    const sOk  = !filterSev    || d.occurrence===filterSev || (filterSev==='HMI' && (d.occurrence==='HMI 1'||d.occurrence==='HMI 2'));
     const stOk = !filterStatus || d.status===filterStatus;
     // 날짜 범위 우선, 없으면 월 필터
     const dt = (d.date||'').slice(0,10);
@@ -2456,6 +2477,12 @@ function renderTable() {
 }
 
 function filterDefects(q){searchQ=q;renderTable();}
+function setOccTab(el, occ) {
+  document.querySelectorAll('.occ-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  filterSev = occ;
+  renderTable();
+}
 function filterBySev(v){filterSev=v;renderTable();}
 function filterByStatus(v){filterStatus=v;renderTable();}
 

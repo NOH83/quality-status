@@ -2430,10 +2430,10 @@ function renderTable() {
           ? `<span class="photo-icon-btn" data-idx="${idx}" title="${d.photos.length}장" style="cursor:pointer;font-size:20px;display:inline-block;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform='scale(1)'">📷</span><span style="font-size:10px;color:var(--text-muted);display:block;line-height:1.2;font-weight:600;">${d.photos.length}장</span>`
           : '<span style="color:var(--border-dark);font-size:16px;">—</span>'}
       </td>
-      <td style="font-size:12px;color:var(--text-muted);max-width:220px;white-space:pre-wrap;word-break:break-word;line-height:1.5;">${d.desc||'-'}</td>
+      <td style="font-size:12px;color:var(--text-muted);width:300px;min-width:300px;white-space:pre-wrap;word-break:break-word;line-height:1.5;">${d.desc||'-'}</td>
       <td style="font-family:'DM Mono',monospace;text-align:center;">${d.qty||'-'}</td>
-      <td style="font-size:12px;color:var(--text-muted);max-width:220px;white-space:pre-wrap;word-break:break-word;line-height:1.5;">${d.counter||'-'}</td>
-      <td style="font-size:12px;color:var(--text-muted);max-width:160px;white-space:pre-wrap;word-break:break-word;line-height:1.5;">${d.remark||'-'}</td>
+      <td style="font-size:12px;color:var(--text-muted);width:300px;min-width:300px;white-space:pre-wrap;word-break:break-word;line-height:1.5;">${d.counter||'-'}</td>
+      <td style="font-size:12px;color:var(--text-muted);width:200px;min-width:200px;white-space:pre-wrap;word-break:break-word;line-height:1.5;">${d.remark||'-'}</td>
     </tr>`;
   }).join('');
   updateBadge();

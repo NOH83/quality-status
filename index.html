@@ -1611,15 +1611,18 @@ async function sheetLoad() {
 
     if (!json.ok) throw new Error(json.error);
     if (json.data.length > 0) {
+      // 기존 메모리 사진을 _row 기준으로 맵 생성 (행번호로 정확히 매칭)
+      const existingPhotoMap = {};
+      defects.forEach(x => { if (x._row) existingPhotoMap[x._row] = x.photos; });
+
       defects = json.data.map(d => {
-        // Sheets에서 온 photos URL 복원
         let photos = [];
         if (d.photos && String(d.photos).trim()) {
+          // Sheets에 photos URL 있으면 복원
           photos = String(d.photos).split('|').filter(Boolean).map(url => ({ url, thumb: url }));
-        } else {
-          // Sheets에 photos 없으면 기존 메모리 데이터 유지
-          const existing = defects.find(x => x.partNo === d.partNo);
-          photos = (existing && Array.isArray(existing.photos)) ? existing.photos : [];
+        } else if (d._row && existingPhotoMap[d._row]) {
+          // _row 기준으로 해당 행의 사진만 유지 (같은 품번 다른 행 사진 섞임 방지)
+          photos = existingPhotoMap[d._row];
         }
         return { ...d, photos };
       });
@@ -2462,9 +2465,16 @@ function closeModal(){
 async function submitDefect(){
   const item=document.getElementById('f-item').value.trim();
   if(!item){ alert('품목명을 입력하세요.'); return; }
+  const inputPartNo = document.getElementById('f-partno').value.trim();
+  // 같은 품번이 이미 있으면 suffix 추가해서 고유하게 만들기
+  let uniquePartNo = inputPartNo || `PN-${Date.now()}`;
+  if (inputPartNo) {
+    const existing = defects.filter(x => x.partNo === inputPartNo || x.partNo.startsWith(inputPartNo + '-'));
+    if (existing.length > 0) uniquePartNo = `${inputPartNo}-${existing.length + 1}`;
+  }
   const d={
     carModel:   document.getElementById('f-carmodel').value||'-',
-    partNo:     document.getElementById('f-partno').value||`PN-${Date.now()}`,
+    partNo:     uniquePartNo,
     item,
     serial:     '-',
     type:       document.getElementById('f-type').value,

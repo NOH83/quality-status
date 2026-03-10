@@ -2447,11 +2447,13 @@ function closeDetail(){ document.getElementById('modal-detail').classList.remove
 function openModal(){
   ['f-carmodel','f-partno','f-item','f-owner','f-desc','f-qty','f-remark'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   uploadedPhotos=[]; renderPhotoGrid();
+  document.getElementById('f-photos').value='';
   document.getElementById('modal-reg').classList.add('open');
   const fab = document.querySelector('.fab-btn');
   if (fab) fab.style.display = 'none';
 }
 function closeModal(){
+  uploadedPhotos=[]; renderPhotoGrid();
   document.getElementById('modal-reg').classList.remove('open');
   const fab = document.querySelector('.fab-btn');
   if (fab) fab.style.display = '';
@@ -2497,8 +2499,10 @@ function openEditModal(id){
   document.getElementById('e-date').value     = (d.date||'').slice(0,10);
   setSelectVal('e-type',d.type); setSelectVal('e-sev',d.occurrence);
   setSelectVal('e-status',d.status);
-  // 기존 사진 불러오기
+  // 기존 사진 초기화 후 해당 불량 사진만 로드
+  uploadedPhotos = [];
   uploadedPhotos = Array.isArray(d.photos) ? d.photos.map(p => typeof p === 'string' ? {url:p,thumb:p} : p) : [];
+  document.getElementById('e-photos').value='';
   renderEditPhotoGrid();
   document.getElementById('modal-edit').classList.add('open');
   const fab = document.querySelector('.fab-btn');
@@ -2509,6 +2513,7 @@ function setSelectVal(id,val){
   for(let opt of sel.options){ if(opt.value===val||opt.text===val){sel.value=opt.value;break;} }
 }
 function closeEditModal(){
+  uploadedPhotos=[]; renderEditPhotoGrid();
   document.getElementById('modal-edit').classList.remove('open');
   const fab = document.querySelector('.fab-btn');
   if (fab) fab.style.display = '';

@@ -434,6 +434,53 @@ tbody tr:hover td { background: #f8faff; }
 .check-label { flex: 1; font-size: 13.5px; font-weight: 500; }
 .check-std { font-size: 11.5px; color: var(--text-light); font-family: 'DM Mono', monospace; }
 
+/* ── 귀책처 멀티셀렉트 ── */
+.ms-wrap { position: relative; }
+.ms-trigger {
+  width: 100%; min-height: 42px; padding: 8px 34px 8px 12px;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  background: var(--white); cursor: pointer;
+  font-size: 13.5px; color: var(--text); text-align: left;
+  display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
+  transition: border-color .15s;
+}
+.ms-trigger:hover, .ms-trigger.open { border-color: var(--primary); }
+.ms-trigger::after {
+  content: '▾'; position: absolute; right: 12px; top: 50%;
+  transform: translateY(-50%); color: var(--text-muted); font-size: 12px; pointer-events: none;
+}
+.ms-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--primary); color: #fff;
+  border-radius: 5px; padding: 2px 7px; font-size: 12px; font-weight: 600;
+}
+.ms-tag .ms-remove { cursor: pointer; font-size: 13px; line-height: 1; opacity: .8; }
+.ms-tag .ms-remove:hover { opacity: 1; }
+.ms-placeholder { color: var(--text-light); font-size: 13px; }
+.ms-dropdown {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 10px; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  overflow: hidden; display: none;
+}
+.ms-dropdown.open { display: block; }
+.ms-option {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px; cursor: pointer; font-size: 13.5px;
+  transition: background .1s;
+}
+.ms-option:hover { background: var(--bg); }
+.ms-option.selected { background: var(--primary-light, #eff6ff); }
+.ms-option .ms-chk {
+  width: 18px; height: 18px; border: 2px solid var(--border-dark);
+  border-radius: 5px; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0; transition: all .15s;
+  color: transparent;
+}
+.ms-option.selected .ms-chk { background: var(--primary); border-color: var(--primary); color: #fff; }
+.ms-opt-ko { font-weight: 500; }
+.ms-opt-en { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+
 /* ─── SEGMENT TABS ─── */
 .seg-tabs {
   display: flex;
@@ -1441,14 +1488,12 @@ tbody tr:hover td { background: #f8faff; }
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">귀책처 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Responsibility</span></label>
-          <select class="form-select" id="f-owner">
-            <option value="자재">자재 (Material)</option>
-            <option value="품질">품질 (Quality)</option>
-            <option value="생산">생산 (Production)</option>
-            <option value="물류">물류 (Logistics)</option>
-            <option value="보전">보전 (Maintenance)</option>
-            <option value="기타">기타</option>
-          </select>
+          <div class="ms-wrap" id="ms-f-owner-wrap">
+            <div class="ms-trigger" id="ms-f-owner-trigger" onclick="msToggle('f-owner')">
+              <span class="ms-placeholder">귀책처 선택 (복수 선택 가능)</span>
+            </div>
+            <div class="ms-dropdown" id="ms-f-owner-dropdown"></div>
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">등록일 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Date</span></label>
@@ -1578,14 +1623,12 @@ tbody tr:hover td { background: #f8faff; }
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">귀책처 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Responsibility</span></label>
-          <select class="form-select" id="e-owner">
-            <option value="자재">자재 (Material)</option>
-            <option value="품질">품질 (Quality)</option>
-            <option value="생산">생산 (Production)</option>
-            <option value="물류">물류 (Logistics)</option>
-            <option value="보전">보전 (Maintenance)</option>
-            <option value="기타">기타</option>
-          </select>
+          <div class="ms-wrap" id="ms-e-owner-wrap">
+            <div class="ms-trigger" id="ms-e-owner-trigger" onclick="msToggle('e-owner')">
+              <span class="ms-placeholder">귀책처 선택 (복수 선택 가능)</span>
+            </div>
+            <div class="ms-dropdown" id="ms-e-owner-dropdown"></div>
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">등록일 <span style="font-size:10px;font-weight:400;color:var(--text-light);">Date</span></label>
@@ -1626,6 +1669,84 @@ tbody tr:hover td { background: #f8faff; }
 </div>
 
 <script>
+// ══════════════════════════════════════════════
+// 귀책처 멀티셀렉트 (Multi-select dropdown)
+// — const/let TDZ 방지: 스크립트 최상단 선언
+// ══════════════════════════════════════════════
+const OWNER_OPTIONS = [
+  { ko:'자재', en:'Material' },
+  { ko:'품질', en:'Quality' },
+  { ko:'생산', en:'Production' },
+  { ko:'물류', en:'Logistics' },
+  { ko:'보전', en:'Maintenance' },
+  { ko:'기타', en:'Others' },
+];
+const msState = { 'f-owner': new Set(), 'e-owner': new Set() };
+
+function msInit() {
+  ['f-owner','e-owner'].forEach(id => {
+    const dd = document.getElementById(`ms-${id}-dropdown`);
+    if (!dd) return;
+    dd.innerHTML = OWNER_OPTIONS.map(o => `
+      <div class="ms-option" data-val="${o.ko}" onclick="msToggleOption('${id}','${o.ko}',this)">
+        <div class="ms-chk">✓</div>
+        <span class="ms-opt-ko">${o.ko}</span>
+        <span class="ms-opt-en">${o.en}</span>
+      </div>`).join('');
+  });
+}
+function msToggle(id) {
+  const dd = document.getElementById(`ms-${id}-dropdown`);
+  const tr = document.getElementById(`ms-${id}-trigger`);
+  if (!dd) return;
+  const isOpen = dd.classList.contains('open');
+  document.querySelectorAll('.ms-dropdown.open').forEach(el => el.classList.remove('open'));
+  document.querySelectorAll('.ms-trigger.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) { dd.classList.add('open'); tr.classList.add('open'); }
+}
+function msToggleOption(id, val, el) {
+  const set = msState[id];
+  if (set.has(val)) { set.delete(val); el.classList.remove('selected'); }
+  else              { set.add(val);    el.classList.add('selected'); }
+  msRender(id);
+}
+function msRender(id) {
+  const tr = document.getElementById(`ms-${id}-trigger`);
+  if (!tr) return;
+  const vals = [...msState[id]];
+  if (vals.length === 0) {
+    tr.innerHTML = '<span class="ms-placeholder">귀책처 선택 (복수 선택 가능)</span>';
+  } else {
+    tr.innerHTML = vals.map(v =>
+      `<span class="ms-tag">${v}<span class="ms-remove" onclick="event.stopPropagation();msRemove('${id}','${v}')">×</span></span>`
+    ).join('');
+  }
+}
+function msRemove(id, val) {
+  msState[id].delete(val);
+  const opt = document.querySelector(`#ms-${id}-dropdown .ms-option[data-val="${val}"]`);
+  if (opt) opt.classList.remove('selected');
+  msRender(id);
+}
+function msGetValues(id) { return [...msState[id]]; }
+function msSetValues(id, vals) {
+  msState[id] = new Set(vals);
+  const dd = document.getElementById(`ms-${id}-dropdown`);
+  if (dd) {
+    dd.querySelectorAll('.ms-option').forEach(el => {
+      el.classList.toggle('selected', msState[id].has(el.dataset.val));
+    });
+  }
+  msRender(id);
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ms-wrap')) {
+    document.querySelectorAll('.ms-dropdown.open').forEach(el => el.classList.remove('open'));
+    document.querySelectorAll('.ms-trigger.open').forEach(el => el.classList.remove('open'));
+  }
+});
+// msInit()은 INIT 섹션에서 호출
+
 // ══════════════════════════════════════════════════════
 //  Google Sheets 연동 설정
 //  Apps Script 배포 후 사이드바 하단 버튼으로 URL 입력
@@ -1830,6 +1951,7 @@ let filterDateTo   = '';  // 종료일 (YYYY-MM-DD)
 
 // 생산수량 데이터 { 'YYYY-MM': qty }
 let productionData = {};
+let occProdData = {};
 let uploadedPhotos=[];
 
 // ══ NAVIGATION ══
@@ -1916,7 +2038,15 @@ function renderDashboard() {
 
   function groupBy(arr, key) {
     const map = {};
-    arr.forEach(d => { const k = d[key]||'-'; map[k] = (map[k]||0)+1; });
+    arr.forEach(d => {
+      const raw = d[key]||'-';
+      // owner(귀책처)는 복수값(쉼표 구분) 분산 집계
+      if (key === 'owner' && raw.includes(',')) {
+        raw.split(',').forEach(v => { const k=v.trim()||'-'; map[k]=(map[k]||0)+1; });
+      } else {
+        map[raw] = (map[raw]||0)+1;
+      }
+    });
     return Object.entries(map).sort((a,b) => b[1]-a[1]);
   }
 
@@ -2023,12 +2153,19 @@ const KO_EN = {
   'HMI 1': 'HMI 1',        'HMI 2': 'HMI 2',
   // 귀책처
   '자재': 'Material',  '품질': 'Quality',
-  '생산': 'Production','물류': 'Logistics','보전': 'Maintenance',
+  '생산': 'Production','물류': 'Logistics','보전': 'Maintenance','기타': 'Others',
   // 상태
   'open': 'Open', 'closed': 'Done',
 };
 function biLang(val) {
   if (!val || val === '-') return val || '-';
+  // 복수 귀책처 처리 (쉼표 구분)
+  if (val.includes(',')) {
+    return val.split(',').map(v => {
+      const en = KO_EN[v.trim()];
+      return en ? `${v.trim()}<span style="font-size:10px;color:var(--text-muted);font-weight:400;"> ${en}</span>` : v.trim();
+    }).join(', ');
+  }
   const en = KO_EN[val];
   return en ? `${val}<br><span style="font-size:10px;color:var(--text-muted);font-weight:400;">${en}</span>` : val;
 }
@@ -2260,7 +2397,14 @@ function renderReport() {
 
   function groupBy(arr, key) {
     const map = {};
-    arr.forEach(d => { const k = d[key]||'-'; map[k]=(map[k]||0)+1; });
+    arr.forEach(d => {
+      const raw = d[key]||'-';
+      if (key === 'owner' && raw.includes(',')) {
+        raw.split(',').forEach(v => { const k=v.trim()||'-'; map[k]=(map[k]||0)+1; });
+      } else {
+        map[raw] = (map[raw]||0)+1;
+      }
+    });
     return Object.entries(map).sort((a,b) => b[1]-a[1]);
   }
 
@@ -2622,7 +2766,7 @@ function openDetail(partNo){
     <div class="detail-row"><div class="detail-key">불량 유형<br><span style="font-size:10px;opacity:.6;">Defect Type</span></div><div class="detail-val">${d.type}${KO_EN[d.type]?'<br><span style="font-size:11px;color:var(--text-muted);">'+KO_EN[d.type]+'</span>':''}</div></div>
     <div class="detail-row"><div class="detail-key">발생처<br><span style="font-size:10px;opacity:.6;">Occurrence</span></div><div class="detail-val">${d.occurrence||'-'}${KO_EN[d.occurrence]?'<br><span style="font-size:11px;color:var(--text-muted);">'+KO_EN[d.occurrence]+'</span>':''}</div></div>
     <div class="detail-row"><div class="detail-key">불량 수량<br><span style="font-size:10px;opacity:.6;">Qty</span></div><div class="detail-val">${d.qty||'-'} ea</div></div>
-    <div class="detail-row"><div class="detail-key">귀책처<br><span style="font-size:10px;opacity:.6;">Responsibility</span></div><div class="detail-val">${d.owner}${KO_EN[d.owner]?'<br><span style="font-size:11px;color:var(--text-muted);">'+KO_EN[d.owner]+'</span>':''}</div></div>
+    <div class="detail-row"><div class="detail-key">귀책처<br><span style="font-size:10px;opacity:.6;">Responsibility</span></div><div class="detail-val">${(d.owner||'-').split(',').map(v=>{const en=KO_EN[v.trim()];return en?v.trim()+'<span style="font-size:11px;color:var(--text-muted);"> '+en+'</span>':v.trim();}).join('<br>')}</div></div>
     <div class="detail-row"><div class="detail-key">등록일<br><span style="font-size:10px;opacity:.6;">Date</span></div><div class="detail-val">${(d.date||"").slice(0,10)}</div></div>
     <div class="detail-row"><div class="detail-key">불량 내용<br><span style="font-size:10px;opacity:.6;">Description</span></div><div class="detail-val" style="line-height:1.7;">${d.desc}</div></div>
     ${d.counter?`<div class="detail-row"><div class="detail-key">대책<br><span style="font-size:10px;opacity:.6;">Countermeasure</span></div><div class="detail-val" style="line-height:1.7;">${d.counter}</div></div>`:''}
@@ -2646,7 +2790,8 @@ function closeDetail(){ document.getElementById('modal-detail').classList.remove
 
 // ══ 불량 등록 ══
 function openModal(){
-  ['f-carmodel','f-partno','f-item','f-owner','f-desc','f-qty','f-counter','f-remark'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['f-carmodel','f-partno','f-item','f-desc','f-qty','f-counter','f-remark'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  msSetValues('f-owner', []);
   const fd = document.getElementById('f-date');
   if (fd) fd.value = new Date().toISOString().slice(0,10);
   uploadedPhotos=[]; renderPhotoGrid();
@@ -2681,7 +2826,7 @@ async function submitDefect(){
     occurrence: document.getElementById('f-sev').value,
     qty:        document.getElementById('f-qty').value||'-',
     date:       document.getElementById('f-date')?.value || new Date().toISOString().slice(0,10),
-    owner:      document.getElementById('f-owner').value||'미지정',
+    owner:      msGetValues('f-owner').join(',')||'미지정',
     status:     'open',
     desc:       document.getElementById('f-desc').value||'-',
     counter:    document.getElementById('f-counter').value||'',
@@ -2706,7 +2851,7 @@ function openEditModal(idx){
   document.getElementById('e-partno').value   = d.partNo||'';
   document.getElementById('e-item').value     = d.item||'';
   document.getElementById('e-qty').value      = d.qty||'';
-  document.getElementById('e-owner').value    = d.owner||'';
+  msSetValues('e-owner', d.owner ? d.owner.split(',').map(s=>s.trim()) : []);
   document.getElementById('e-desc').value     = d.desc||'';
   document.getElementById('e-counter').value  = d.counter||'';
   document.getElementById('e-remark').value   = d.remark||'';
@@ -2729,6 +2874,7 @@ function setSelectVal(id,val){
 function closeEditModal(){
   editingIdx=null;
   uploadedPhotos=[]; renderEditPhotoGrid();
+  msSetValues('e-owner', []);
   document.getElementById('modal-edit').classList.remove('open');
   const fab = document.querySelector('.fab-btn');
   if (fab) fab.style.display = '';
@@ -2743,7 +2889,7 @@ async function saveEdit(){
   d.item=item; d.serial='-';
   d.type=document.getElementById('e-type').value; d.occurrence=document.getElementById('e-sev').value;
   d.qty=document.getElementById('e-qty').value||'-';
-  d.owner=document.getElementById('e-owner').value||'미지정';
+  d.owner=msGetValues('e-owner').join(',')||'미지정';
   d.date=document.getElementById('e-date').value; d.desc=document.getElementById('e-desc').value||'-'; d.counter=document.getElementById('e-counter').value||''; d.remark=document.getElementById('e-remark').value||'';
   d.photos=[...uploadedPhotos];
   closeEditModal(); renderTable(); renderHomeDefects(); updateBadge(); renderDashboard();
@@ -3109,6 +3255,7 @@ function toggleLockPw() {
 }
 
 // ══ INIT ══
+msInit();
 renderHomeDefects();
 renderDashboard();
 updateBadge();
@@ -3116,6 +3263,8 @@ updateSheetBtn();
 updatePollBtn();
 updateFilterMonthLabel();
 if (GAS_URL) sheetLoad();
+
+
 
 
 
